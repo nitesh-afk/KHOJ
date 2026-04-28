@@ -11,6 +11,7 @@ public class Application {
     private String studentEmail;
     private String landlordName;
     private String landlordEmail;
+
     private String roomTitle;
 
     public Application() {}
