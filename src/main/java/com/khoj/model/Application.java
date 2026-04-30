@@ -3,17 +3,16 @@ package com.khoj.model;
 public class Application {
     private int appId;
     private int tenantId;
-    private int roomId;
+    private int propertyId;
     private String status;
 
-    // Extended fields for the Landlord/Student view (from JOIN)
-    private String studentName;
-    private String studentEmail;
+    // Extended fields for the Landlord/Tenant view (from JOIN)
+    private String tenantName;
+    private String tenantEmail;
     private String landlordName;
     private String landlordEmail;
 
-    private String roomTitle;
-
+    private String propertyTitle;
     public Application() {}
 
     // Getters and Setters
@@ -23,17 +22,17 @@ public class Application {
     public int getTenantId() { return tenantId; }
     public void setTenantId(int tenantId) { this.tenantId = tenantId; }
 
-    public int getRoomId() { return roomId; }
-    public void setRoomId(int roomId) { this.roomId = roomId; }
+    public int getPropertyId() { return propertyId; }
+    public void setPropertyId(int propertyId) { this.propertyId = propertyId; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public String getStudentName() { return studentName; }
-    public void setStudentName(String studentName) { this.studentName = studentName; }
+    public String getTenantName() { return tenantName; }
+    public void setTenantName(String tenantName) { this.tenantName = tenantName; }
 
-    public String getStudentEmail() { return studentEmail; }
-    public void setStudentEmail(String studentEmail) { this.studentEmail = studentEmail; }
+    public String getTenantEmail() { return tenantEmail; }
+    public void setTenantEmail(String tenantEmail) { this.tenantEmail = tenantEmail; }
 
     public String getLandlordName() { return landlordName; }
     public void setLandlordName(String landlordName) { this.landlordName = landlordName; }
@@ -41,6 +40,6 @@ public class Application {
     public String getLandlordEmail() { return landlordEmail; }
     public void setLandlordEmail(String landlordEmail) { this.landlordEmail = landlordEmail; }
 
-    public String getRoomTitle() { return roomTitle; }
-    public void setRoomTitle(String roomTitle) { this.roomTitle = roomTitle; }
+    public String getPropertyTitle() { return propertyTitle; }
+    public void setPropertyTitle(String propertyTitle) { this.propertyTitle = propertyTitle; }
 }

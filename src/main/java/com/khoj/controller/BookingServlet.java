@@ -28,7 +28,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        List<Application> myApplications = appDAO.getApplicationsByStudent(user.getId());
+        List<Application> myApplications = appDAO.getApplicationsByTenant(user.getId());
         request.setAttribute("myApplications", myApplications);
         
         request.getRequestDispatcher("/views/tenant/my-bookings.jsp").forward(request, response);

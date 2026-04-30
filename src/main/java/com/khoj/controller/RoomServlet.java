@@ -1,7 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.RoomDAO;
-import com.khoj.model.Room;
+import com.khoj.dao.PropertyDAO;
+import com.khoj.model.Property;
 import com.khoj.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @WebServlet({"/RoomServlet", "/my-rooms"})
 public class RoomServlet extends HttpServlet {
-    private RoomDAO roomDAO = new RoomDAO();
+    private PropertyDAO propertyDAO = new PropertyDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -29,11 +29,11 @@ public class RoomServlet extends HttpServlet {
             return;
         }
 
-        // Fetch All Rooms for this Landlord
-        List<Room> rooms = roomDAO.getRoomsByOwner(user.getId());
-        request.setAttribute("rooms", rooms);
+        // Fetch All Properties for this Landlord
+        List<Property> properties = propertyDAO.getPropertiesByLandlord(user.getId());
+        request.setAttribute("properties", properties);
         
-        // Forward to the Inventory View
+        // Forward to the Inventory View (Note: my-rooms.jsp might need field updates too)
         request.getRequestDispatcher("/views/landlord/my-rooms.jsp").forward(request, response);
     }
 
@@ -50,29 +50,35 @@ public class RoomServlet extends HttpServlet {
             return;
         }
 
-        // Capture Room Data
+        // Capture Property Data (Updated to match new schema/DTO)
         String title = request.getParameter("title");
         String description = request.getParameter("description");
-        String location = request.getParameter("location");
+        int neighborhoodId = Integer.parseInt(request.getParameter("neighborhoodId"));
+        int typeId = Integer.parseInt(request.getParameter("typeId"));
         double price = Double.parseDouble(request.getParameter("price"));
-        String roomType = request.getParameter("roomType");
+        String priceModel = request.getParameter("priceModel");
+        String furnishingStatus = request.getParameter("furnishingStatus");
         String imageUrl = request.getParameter("imageUrl");
 
         // Create Model
-        Room room = new Room();
-        room.setOwnerId(user.getId());
-        room.setTitle(title);
-        room.setDescription(description);
-        room.setLocation(location);
-        room.setPrice(price);
-        room.setRoomType(roomType);
-        room.setImageUrl(imageUrl);
-        room.setStatus("Available");
+        Property property = new Property();
+        property.setLandlordId(user.getId());
+        property.setNeighborhoodId(neighborhoodId);
+        property.setTypeId(typeId);
+        property.setTitle(title);
+        property.setDescription(description);
+        property.setPrice(price);
+        property.setPriceModel(priceModel);
+        property.setFurnishingStatus(furnishingStatus);
 
         // Save to DB
-        boolean success = roomDAO.addRoom(room);
+        int propertyId = propertyDAO.addProperty(property);
 
-        if (success) {
+        if (propertyId > 0) {
+            // Save primary image
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                propertyDAO.addPropertyImage(propertyId, imageUrl, true);
+            }
             response.sendRedirect(request.getContextPath() + "/LandlordDashboard?msg=room_added");
         } else {
             response.sendRedirect(request.getContextPath() + "/views/landlord/add-room.jsp?error=failed");

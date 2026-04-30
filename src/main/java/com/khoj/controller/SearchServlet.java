@@ -1,7 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.RoomDAO;
-import com.khoj.model.Room;
+import com.khoj.dao.PropertyDAO;
+import com.khoj.model.Property;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,24 +12,30 @@ import java.util.List;
 
 @WebServlet({"/SearchServlet", "/search"})
 public class SearchServlet extends HttpServlet {
-    private RoomDAO roomDAO = new RoomDAO();
+    private PropertyDAO propertyDAO = new PropertyDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        String query = request.getParameter("query");
-        List<Room> rooms;
+        String location = request.getParameter("location");
+        String type = request.getParameter("type");
+        String priceModel = request.getParameter("priceModel");
+        String theme = request.getParameter("theme");
 
-        if (query == null || query.trim().isEmpty()) {
-            rooms = roomDAO.searchRooms(""); // Fetch all available rooms
+        List<Property> properties;
+        
+        if (theme != null && !theme.isEmpty()) {
+            properties = propertyDAO.getPropertiesByTheme(theme);
         } else {
-            rooms = roomDAO.searchRooms(query);
+            // Advanced search using PropertyDAO
+            properties = propertyDAO.searchProperties(location, type, priceModel);
         }
 
-        request.setAttribute("rooms", rooms);
-        request.setAttribute("searchQuery", query);
+        request.setAttribute("properties", properties);
+        request.setAttribute("searchLocation", location != null ? location : theme);
         
+        // Forward to search results page
         request.getRequestDispatcher("/views/tenant/dashboard.jsp").forward(request, response);
     }
 }

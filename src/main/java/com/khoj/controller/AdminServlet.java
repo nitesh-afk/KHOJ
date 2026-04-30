@@ -1,7 +1,7 @@
 package com.khoj.controller;
 
 import com.khoj.dao.AdminDAO;
-import com.khoj.dao.RoomDAO;
+import com.khoj.dao.PropertyDAO;
 import com.khoj.dao.UserDAO;
 import com.khoj.model.User;
 import jakarta.servlet.ServletException;
@@ -19,27 +19,25 @@ import java.util.Map;
 public class AdminServlet extends HttpServlet {
     private AdminDAO adminDAO = new AdminDAO();
     private UserDAO userDAO = new UserDAO();
-    private RoomDAO roomDAO = new RoomDAO();
+    private PropertyDAO propertyDAO = new PropertyDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        // RBAC: Check if ADMIN
         if (!checkAdmin(request)) {
             response.sendRedirect(request.getContextPath() + "/views/auth/403-access-denied.jsp");
             return;
         }
 
-        System.out.println("LOG: Admin access confirmed. Generating dashboard summary.");
-
-        // Fetch Stats
+        // Fetch Global Stats
         Map<String, Integer> summary = adminDAO.getSystemSummary();
         request.setAttribute("stats", summary);
 
-        // Fetch User and Room tables
+        // Fetch User and Property tables
         request.setAttribute("users", userDAO.getAllUsers());
-        request.setAttribute("rooms", roomDAO.getAllRooms());
+        
+        request.setAttribute("properties", propertyDAO.getAllProperties());
 
         request.getRequestDispatcher("/views/admin/dashboard.jsp").forward(request, response);
     }
@@ -56,18 +54,16 @@ public class AdminServlet extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null) return;
 
-        System.out.println("LOG: Admin action triggered: " + action);
-
         switch (action) {
             case "deleteUser":
                 int userId = Integer.parseInt(request.getParameter("userId"));
                 userDAO.deleteUser(userId);
                 break;
             
-            case "approveRoom":
-                int roomId = Integer.parseInt(request.getParameter("roomId"));
-                boolean approve = Boolean.parseBoolean(request.getParameter("approve"));
-                adminDAO.updateRoomStatus(roomId, approve);
+            case "verifyProperty":
+                int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+                boolean verify = Boolean.parseBoolean(request.getParameter("verify"));
+                adminDAO.verifyProperty(propertyId, verify);
                 break;
                 
             case "deactivateUser":
