@@ -10,46 +10,75 @@ import java.util.List;
 
 public class UserDAO {
 
-    public boolean registerUser(User user) {
-        String query = "INSERT INTO users (full_name, email, password, role, status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(query)) {
-            pst.setString(1, user.getFullName());
-            pst.setString(2, user.getEmail());
-            pst.setString(3, user.getPassword());
-            pst.setString(4, user.getRole());
-            pst.setString(5, user.getStatus() != null ? user.getStatus() : "ACTIVE");
-            return pst.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
-    }
-
-    public User loginUser(String email, String password) {
-        String query = "SELECT * FROM users WHERE email = ?";
+    public User getUserByEmail(String email) {
+        String query = "SELECT u.*, r.role_name FROM users u " +
+                       "JOIN roles r ON u.role_id = r.role_id " +
+                       "WHERE u.email = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
             pst.setString(1, email);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    User user = new User(
+                    return new User(
                         rs.getInt("user_id"),
                         rs.getString("full_name"),
                         rs.getString("email"),
                         rs.getString("password"),
-                        rs.getString("role"),
+                        rs.getString("role_name"),
                         rs.getString("status")
                     );
-                    return user;
                 }
             }
         } catch (Exception e) { e.printStackTrace(); }
         return null;
     }
 
-    // --- ADMIN METHODS ---
+    public boolean registerUser(User user) {
+        String query = "INSERT INTO users (full_name, email, password, role_id, status) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setString(1, user.getFullName());
+            pst.setString(2, user.getEmail());
+            pst.setString(3, user.getPassword());
+            pst.setInt(4, getRoleIdByName(user.getRole()));
+            pst.setString(5, user.getStatus() != null ? user.getStatus() : "ACTIVE");
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public User loginUser(String email, String plainPassword) {
+        String query = "SELECT u.*, r.role_name FROM users u " +
+                       "JOIN roles r ON u.role_id = r.role_id " +
+                       "WHERE u.email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setString(1, email);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    String hashedPassword = rs.getString("password");
+                    
+                    // Verify hashed password using BCrypt
+                    if (com.khoj.util.SecurityUtil.verifyPassword(plainPassword, hashedPassword)) {
+                        return new User(
+                            rs.getInt("user_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            hashedPassword,
+                            rs.getString("role_name"),
+                            rs.getString("status")
+                        );
+                    }
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
+    }
 
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        String query = "SELECT * FROM users WHERE role != 'ADMIN' ORDER BY user_id DESC";
+        String query = "SELECT u.*, r.role_name FROM users u " +
+                       "JOIN roles r ON u.role_id = r.role_id " +
+                       "WHERE r.role_name != 'ADMIN' ORDER BY u.user_id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query);
              ResultSet rs = pst.executeQuery()) {
@@ -58,8 +87,8 @@ public class UserDAO {
                     rs.getInt("user_id"),
                     rs.getString("full_name"),
                     rs.getString("email"),
-                    null, // Don't expose password
-                    rs.getString("role"),
+                    null,
+                    rs.getString("role_name"),
                     rs.getString("status")
                 ));
             }
@@ -86,13 +115,10 @@ public class UserDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    public int getUserCount() {
-        String query = "SELECT COUNT(*) FROM users";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(query);
-             ResultSet rs = pst.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
-        } catch (Exception e) { e.printStackTrace(); }
-        return 0;
+    private int getRoleIdByName(String roleName) {
+        if ("ADMIN".equalsIgnoreCase(roleName)) return 1;
+        if ("LANDLORD".equalsIgnoreCase(roleName)) return 2;
+        if ("TENANT".equalsIgnoreCase(roleName)) return 3;
+        return 3; 
     }
 }

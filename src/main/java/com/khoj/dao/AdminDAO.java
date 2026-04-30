@@ -11,18 +11,19 @@ public class AdminDAO {
 
     /**
      * ADVANCED STATS: Fetches global system summary using aggregate functions.
+     * Updated for 3NF Schema.
      */
     public Map<String, Integer> getSystemSummary() {
         Map<String, Integer> stats = new HashMap<>();
         
         String usersQuery = "SELECT COUNT(*) FROM users";
-        String roomsQuery = "SELECT COUNT(*) FROM rooms";
-        String pendingQuery = "SELECT COUNT(*) FROM applications WHERE status = 'PENDING'";
+        String propertiesQuery = "SELECT COUNT(*) FROM properties";
+        String pendingAppsQuery = "SELECT COUNT(*) FROM applications WHERE status = 'PENDING'";
 
         try (Connection conn = DBConnection.getConnection()) {
             stats.put("totalUsers", fetchCount(conn, usersQuery));
-            stats.put("totalRooms", fetchCount(conn, roomsQuery));
-            stats.put("pendingApps", fetchCount(conn, pendingQuery));
+            stats.put("totalProperties", fetchCount(conn, propertiesQuery));
+            stats.put("pendingApps", fetchCount(conn, pendingAppsQuery));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,12 +38,15 @@ public class AdminDAO {
         return 0;
     }
 
-    public boolean updateRoomStatus(int roomId, boolean approved) {
-        String query = "UPDATE rooms SET is_approved = ? WHERE id = ?";
+    /**
+     * Updates property verification status.
+     */
+    public boolean verifyProperty(int propertyId, boolean verified) {
+        String query = "UPDATE properties SET is_verified = ? WHERE property_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
-            pst.setBoolean(1, approved);
-            pst.setInt(2, roomId);
+            pst.setBoolean(1, verified);
+            pst.setInt(2, propertyId);
             return pst.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

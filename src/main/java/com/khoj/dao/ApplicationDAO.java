@@ -10,12 +10,12 @@ import java.util.List;
 
 public class ApplicationDAO {
 
-    public boolean applyForRoom(int tenantId, int roomId) {
-        String query = "INSERT INTO applications (tenant_id, room_id, status) VALUES (?, ?, 'PENDING')";
+    public boolean applyForProperty(int tenantId, int propertyId) {
+        String query = "INSERT INTO applications (tenant_id, property_id, status) VALUES (?, ?, 'PENDING')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
             pst.setInt(1, tenantId);
-            pst.setInt(2, roomId);
+            pst.setInt(2, propertyId);
             return pst.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
@@ -25,11 +25,11 @@ public class ApplicationDAO {
      */
     public List<Application> getApplicationsByLandlord(int landlordId) {
         List<Application> apps = new ArrayList<>();
-        String query = "SELECT a.*, u.full_name AS student_name, u.email AS student_email, r.title AS room_title " +
+        String query = "SELECT a.*, u.full_name AS tenant_name, u.email AS tenant_email, p.title AS property_title " +
                        "FROM applications a " +
-                       "JOIN rooms r ON a.room_id = r.id " +
+                       "JOIN properties p ON a.property_id = p.property_id " +
                        "JOIN users u ON a.tenant_id = u.user_id " +
-                       "WHERE r.owner_id = ? " +
+                       "WHERE p.landlord_id = ? " +
                        "ORDER BY a.app_id DESC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -47,18 +47,18 @@ public class ApplicationDAO {
     /**
      * STUDENT VIEW: Fetch my application statuses and landlord contact info.
      */
-    public List<Application> getApplicationsByStudent(int studentId) {
+    public List<Application> getApplicationsByTenant(int tenantId) {
         List<Application> apps = new ArrayList<>();
-        String query = "SELECT a.*, r.title AS room_title, u.full_name AS landlord_name, u.email AS landlord_email " +
+        String query = "SELECT a.*, p.title AS property_title, u.full_name AS landlord_name, u.email AS landlord_email " +
                        "FROM applications a " +
-                       "JOIN rooms r ON a.room_id = r.id " +
-                       "JOIN users u ON r.owner_id = u.user_id " +
+                       "JOIN properties p ON a.property_id = p.property_id " +
+                       "JOIN users u ON p.landlord_id = u.user_id " +
                        "WHERE a.tenant_id = ? " +
                        "ORDER BY a.app_id DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
-            pst.setInt(1, studentId);
+            pst.setInt(1, tenantId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     apps.add(mapResultSetToApplication(rs, null, null, "landlord_name", "landlord_email"));
@@ -78,15 +78,15 @@ public class ApplicationDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    private Application mapResultSetToApplication(ResultSet rs, String sName, String sEmail, String lName, String lEmail) throws Exception {
+    private Application mapResultSetToApplication(ResultSet rs, String tName, String tEmail, String lName, String lEmail) throws Exception {
         Application app = new Application();
         app.setAppId(rs.getInt("app_id"));
         app.setTenantId(rs.getInt("tenant_id"));
-        app.setRoomId(rs.getInt("room_id"));
+        app.setPropertyId(rs.getInt("property_id"));
         app.setStatus(rs.getString("status"));
-        app.setRoomTitle(rs.getString("room_title"));
-        if (sName != null) app.setStudentName(rs.getString(sName));
-        if (sEmail != null) app.setStudentEmail(rs.getString(sEmail));
+        app.setPropertyTitle(rs.getString("property_title"));
+        if (tName != null) app.setTenantName(rs.getString(tName));
+        if (tEmail != null) app.setTenantEmail(rs.getString(tEmail));
         if (lName != null) app.setLandlordName(rs.getString(lName));
         if (lEmail != null) app.setLandlordEmail(rs.getString(lEmail));
         return app;

@@ -2,6 +2,7 @@ package com.khoj.controller;
 
 import com.khoj.dao.UserDAO;
 import com.khoj.model.User;
+import com.khoj.util.SecurityUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,33 +14,51 @@ import java.io.IOException;
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        request.getRequestDispatcher("views/auth/login.jsp").forward(request, response);
+    }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        User user = userDAO.loginUser(email, password);
+        User user = userDAO.getUserByEmail(email);
+        boolean isValid = false;
 
         if (user != null) {
-            // Create Session
+            isValid = SecurityUtil.verifyPassword(password, user.getPassword());
+        }
+
+        if (isValid) {
+            // 1. Status Check (RBAC requirement)
+            if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
+                response.sendRedirect("views/auth/login.jsp?error=account_deactivated");
+                return;
+            }
+
+            // 2. Create Session
             HttpSession session = request.getSession();
             session.setAttribute("user", user);
 
-            // Role-based Redirection
+            // 3. Unified Routing (TENANTS go to the Premium Home Page)
             String role = user.getRole();
             if ("ADMIN".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/AdminServlet");
             } else if ("LANDLORD".equalsIgnoreCase(role)) {
                 response.sendRedirect(request.getContextPath() + "/LandlordDashboard");
             } else if ("TENANT".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/search");
+                // Point to the servlet that fetches property discovery data
+                response.sendRedirect(request.getContextPath() + "/home");
             } else {
-                response.sendRedirect("index.jsp");
+                response.sendRedirect("home");
             }
         } else {
-            // Login failed
             response.sendRedirect("views/auth/login.jsp?error=invalid");
         }
     }

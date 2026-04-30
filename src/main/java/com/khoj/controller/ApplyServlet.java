@@ -21,18 +21,23 @@ public class ApplyServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
-        if (user == null || !"TENANT".equalsIgnoreCase(user.getRole())) {
-            response.sendRedirect(request.getContextPath() + "/views/auth/login.jsp");
+        if (user == null) {
+            response.sendRedirect("views/auth/login.jsp");
             return;
         }
 
-        int roomId = Integer.parseInt(request.getParameter("roomId"));
-        boolean success = appDAO.applyForRoom(user.getId(), roomId);
+        String propertyIdStr = request.getParameter("propertyId");
+        if (propertyIdStr != null) {
+            int propertyId = Integer.parseInt(propertyIdStr);
+            boolean success = appDAO.applyForProperty(user.getId(), propertyId);
 
-        if (success) {
-            response.sendRedirect(request.getContextPath() + "/search?msg=applied");
+            if (success) {
+                response.sendRedirect("home?msg=applied");
+            } else {
+                response.sendRedirect("property-detail?id=" + propertyId + "&error=failed");
+            }
         } else {
-            response.sendRedirect(request.getContextPath() + "/RoomDetails?id=" + roomId + "&error=failed");
+            response.sendRedirect("home");
         }
     }
 }
