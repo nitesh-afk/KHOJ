@@ -13,6 +13,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
 
+/* Admin servlet*/
+
 @WebServlet("/AdminServlet")
 public class AdminServlet extends HttpServlet {
     private AdminDAO adminDAO = new AdminDAO();
