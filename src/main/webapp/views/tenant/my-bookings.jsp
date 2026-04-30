@@ -43,54 +43,86 @@
         }
     </style>
 </head>
-<body style="background-color: #f1f5f9;">
+<body style="background-color: #f5f7fa; display: block; margin: 0; padding: 0;">
 
-    <nav style="padding: 1.5rem 10%; background: white; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-        <div style="font-size: 1.5rem; font-weight: 700; color: #2563eb;">KHOJ</div>
-        <div style="display: flex; gap: 2rem; align-items: center;">
-            <a href="${pageContext.request.contextPath}/search" style="text-decoration: none; color: #64748b; font-weight: 500;">Discovery</a>
-            <a href="${pageContext.request.contextPath}/my-bookings" style="text-decoration: none; color: #2563eb; font-weight: 700;">My Bookings</a>
-            <a href="${pageContext.request.contextPath}/views/auth/login.jsp" class="badge badge-occupied" style="text-decoration: none;">Logout</a>
+    <!-- Fixed Top Navigation Bar -->
+    <nav style="width: 100%; background: #003580; color: white; padding: 1rem 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;">
+        <div style="max-width: 1140px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="location.href='home'">
+                <i class="fa-solid fa-earth-asia" style="color: #ffb700;"></i> KHOJ
+            </div>
+            <div style="display: flex; gap: 25px; align-items: center;">
+                <a href="${pageContext.request.contextPath}/search" style="text-decoration: none; color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.95rem;">Discovery</a>
+                <a href="${pageContext.request.contextPath}/my-bookings" style="text-decoration: none; color: white; font-weight: 700; font-size: 0.95rem; border-bottom: 2px solid #ffb700; padding-bottom: 4px;">My Bookings</a>
+                <a href="${pageContext.request.contextPath}/LogoutServlet" style="text-decoration: none; color: #ff9e9e; font-weight: 700; font-size: 0.95rem;">Logout</a>
+            </div>
         </div>
     </nav>
 
-    <div style="max-width: 800px; margin: 3rem auto; padding: 0 1rem;">
-        <h1 style="margin-bottom: 2rem;">My Application Status</h1>
+    <!-- Main Content Container -->
+    <main style="max-width: 800px; margin: 50px auto; padding: 0 20px;">
+        <div style="background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); padding: 40px; border: 1px solid #eee;">
+            <div style="border-bottom: 2px solid #f0f0f0; margin-bottom: 30px; padding-bottom: 15px;">
+                <h1 style="font-size: 2rem; font-weight: 800; color: #1a1a1a; margin: 0;">My Application Status</h1>
+                <p style="color: #666; margin-top: 5px;">Track your housing inquiries and connection status with landlords.</p>
+            </div>
 
-        <c:forEach var="app" items="${myApplications}">
-            <div class="booking-card status-${app.status}">
-                <div>
-                    <h3 style="margin-bottom: 0.25rem;">${app.roomTitle}</h3>
-                    <p style="color: #64748b; font-size: 0.875rem;">Application ID: #${app.appId}</p>
-                    
-                    <c:if test="${app.status == 'ACCEPTED'}">
-                        <div class="landlord-info">
-                            <div>
-                                <strong>Landlord:</strong> ${app.landlordName}<br>
-                                <strong>Email:</strong> ${app.landlordEmail}
+            <div class="applications-list">
+                <c:forEach var="app" items="${myApplications}">
+                    <div class="booking-card status-${app.status}" style="border: 1px solid #f0f0f0; transition: all 0.3s ease;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <span class="badge" style="background: #f0f4ff; color: #003580; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase;">
+                                    ID: #${app.appId}
+                                </span>
+                                <span class="badge ${app.status == 'ACCEPTED' ? 'badge-available' : (app.status == 'REJECTED' ? 'badge-occupied' : '')}" 
+                                      style="font-size: 0.75rem; padding: 4px 12px; border-radius: 4px;">
+                                    ${app.status}
+                                </span>
                             </div>
-                            <a href="mailto:${app.landlordEmail}" class="btn-contact">Contact Now</a>
+                            <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 10px; color: #1a1a1a;">${app.roomTitle}</h3>
+                            
+                            <c:if test="${app.status == 'ACCEPTED'}">
+                                <div class="landlord-info" style="border: 1px solid #e0e7ff; background: #f5f8ff;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 700; color: #003580; margin-bottom: 4px;">
+                                            <i class="fa-solid fa-user-tie"></i> ${app.landlordName}
+                                        </div>
+                                        <div style="color: #555; font-size: 0.85rem;">
+                                            <i class="fa-solid fa-envelope"></i> ${app.landlordEmail}
+                                        </div>
+                                    </div>
+                                    <a href="mailto:${app.landlordEmail}" class="btn-contact" style="background: #003580;">
+                                        Message Landlord
+                                    </a>
+                                </div>
+                            </c:if>
                         </div>
-                    </c:if>
-                </div>
-                
-                <div style="text-align: right;">
-                    <span class="badge ${app.status == 'ACCEPTED' ? 'badge-available' : (app.status == 'REJECTED' ? 'badge-occupied' : '')}" 
-                          style="font-size: 0.875rem; padding: 0.5rem 1rem;">
-                        ${app.status}
-                    </span>
-                    <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem;">Update: Just now</p>
-                </div>
-            </div>
-        </c:forEach>
+                        
+                        <div style="text-align: right; min-width: 120px;">
+                            <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                <i class="fa-solid fa-clock-rotate-left"></i> Updated today
+                            </div>
+                        </div>
+                    </div>
+                </c:forEach>
 
-        <c:if test="${empty myApplications}">
-            <div style="text-align: center; padding: 5rem; background: white; border-radius: 1rem;">
-                <p style="color: #64748b; font-size: 1.125rem;">You haven't applied for any rooms yet.</p>
-                <a href="${pageContext.request.contextPath}/search" style="color: #2563eb; font-weight: 600;">Go Find a Room →</a>
+                <c:if test="${empty myApplications}">
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 4rem; color: #e2e8f0; margin-bottom: 20px;">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <h2 style="font-size: 1.5rem; font-weight: 700; color: #475569; margin-bottom: 10px;">No Applications Found</h2>
+                        <p style="color: #64748b; margin-bottom: 30px;">You haven't applied for any properties yet. Start your search to find the perfect stay.</p>
+                        <a href="${pageContext.request.contextPath}/search" 
+                           style="background: #003580; color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: 700; transition: 0.2s;">
+                            Explore Properties
+                        </a>
+                    </div>
+                </c:if>
             </div>
-        </c:if>
-    </div>
+        </div>
+    </main>
 
 </body>
 </html>

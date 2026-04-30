@@ -1,123 +1,361 @@
 :root {
-    --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
-    --bg-color: #f8fafc;
-    --text-color: #1e293b;
-    --card-bg: #ffffff;
-    --error-color: #ef4444;
-    --success-color: #10b981;
+    --primary-blue: #003580;
+    --accent-yellow: #ffb700;
+    --dark-text: #1a1a1a;
+    --gray-bg: #f5f7fa;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
     margin: 0;
+    padding: 0;
+    background-color: var(--gray-bg);
+    color: var(--dark-text);
+}
+
+/* Hero Section */
+.hero {
+    background-color: var(--primary-blue);
+    padding: 80px 20px 140px 20px;
+    text-align: left;
+    color: white;
+}
+
+.hero-content {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    font-weight: 800;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Search Bar */
+.search-container {
+    max-width: 1100px;
+    margin: -60px auto 0 auto;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 15px;
+    border-right: 1px solid #ddd;
+}
+
+.search-field:last-of-type {
+    border-right: none;
+}
+
+.search-field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.search-field input, .search-field select {
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 100%;
+}
+
+.btn-search {
+    background-color: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-search:hover {
+    background-color: #002b66;
+}
+
+/* Vibe Navigation */
+.vibe-nav {
+    max-width: 1100px;
+    margin: 40px auto 20px auto;
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.vibe-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    min-width: 80px;
+}
+
+.vibe-icon {
+    width: 48px;
+    height: 48px;
+    background: white;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+}
+
+.vibe-item:hover .vibe-icon {
+    transform: translateY(-5px);
+    color: var(--primary-blue);
+}
+
+.vibe-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Scrollers */
+.section-container {
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.scroller {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 10px 0 30px 0;
+    scrollbar-width: none;
+}
+
+.scroller::-webkit-scrollbar {
+    display: none;
+}
+
+/* Property Card */
+.property-card {
+    min-width: 280px;
+    max-width: 280px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.property-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.card-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-badges {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.badge-type {
+    background: #eef2ff;
+    color: var(--primary-blue);
+}
+
+.badge-status {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-location {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+.card-price {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary-blue);
+    margin-bottom: 12px;
+}
+
+.price-model {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #888;
+}
+
+.card-amenities {
+    display: flex;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: #555;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.amenity-icon {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* AUTH & FORMS */
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     min-height: 100vh;
+    background: var(--primary-blue);
 }
 
 .auth-card {
-    background: var(--card-bg);
-    padding: 2.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     width: 100%;
     max-width: 400px;
-    transition: transform 0.2s;
-}
-
-.auth-card:hover {
-    transform: translateY(-2px);
 }
 
 .auth-card h2 {
-    margin-bottom: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
+    margin-top: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-blue);
     text-align: center;
-    font-size: 1.75rem;
+    margin-bottom: 30px;
 }
 
 .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #444;
 }
 
-.form-group input, .form-group select {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.5rem;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
     font-size: 1rem;
+    font-family: inherit;
     box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-blue);
     outline: none;
-    transition: border-color 0.2s, ring 0.2s;
+    box-shadow: 0 0 0 3px rgba(0, 53, 128, 0.1);
 }
 
-.form-group input:focus, .form-group select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-button[type="submit"] {
+.auth-card button {
     width: 100%;
-    background-color: var(--primary-color);
+    background: var(--primary-blue);
     color: white;
-    padding: 0.75rem;
     border: none;
-    border-radius: 0.5rem;
-    font-weight: 600;
+    padding: 14px;
     font-size: 1rem;
+    font-weight: 700;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s;
-    margin-top: 1rem;
+    transition: var(--transition);
 }
 
-button[type="submit"]:hover {
-    background-color: var(--primary-hover);
+.auth-card button:hover {
+    background: #002b66;
 }
 
 .auth-footer {
-    margin-top: 1.5rem;
+    margin-top: 25px;
     text-align: center;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+    color: #666;
 }
 
 .auth-footer a {
-    color: var(--primary-color);
+    color: var(--primary-blue);
     text-decoration: none;
-    font-weight: 500;
-}
-
-.auth-footer a:hover {
-    text-decoration: underline;
+    font-weight: 700;
 }
 
 .alert {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-    text-align: center;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 .alert-error {
-    background-color: #fee2e2;
-    color: var(--error-color);
+    background: #fee2e2;
+    color: #b91c1c;
     border: 1px solid #fecaca;
 }
 
 .alert-success {
-    background-color: #d1fae5;
-    color: var(--success-color);
-    border: 1px solid #a7f3d0;
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
 }

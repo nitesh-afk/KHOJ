@@ -2,7 +2,7 @@ package com.khoj.controller;
 
 import com.khoj.dao.UserDAO;
 import com.khoj.model.User;
-import com.khoj.util.PasswordUtil;
+import com.khoj.util.SecurityUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,7 +35,7 @@ public class RegisterServlet extends HttpServlet {
         }
 
         // 3. Secure the Password (Hashing)
-        String hashedPassword = PasswordUtil.hashPassword(password);
+        String hashedPassword = SecurityUtil.hashPassword(password);
 
         // 4. Create User Model Object
         User newUser = new User(fullName, email, hashedPassword, role, "ACTIVE");

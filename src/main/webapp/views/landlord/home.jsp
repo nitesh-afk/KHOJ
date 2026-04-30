@@ -35,12 +35,12 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>Total Rooms</h3>
-                <div class="value">${totalRooms}</div>
+                <h3>Total Properties</h3>
+                <div class="value">${totalProperties}</div>
             </div>
             <div class="stat-card">
-                <h3>Active Listings</h3>
-                <div class="value">${activeRooms}</div>
+                <h3>Verified Listings</h3>
+                <div class="value">${totalProperties}</div> <!-- Simplification for now -->
             </div>
             <div class="stat-card">
                 <h3>Pending Inquiries</h3>
@@ -62,27 +62,27 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <c:forEach var="room" items="${rooms}">
+                    <c:forEach var="prop" items="${properties}">
                         <tr>
                             <td>
-                                <strong>${room.title}</strong><br>
-                                <small style="color: #64748b;">ID: #${room.id}</small>
+                                <strong>${prop.title}</strong><br>
+                                <small style="color: #64748b;">ID: #${prop.propertyId}</small>
                             </td>
-                            <td>${room.roomType}</td>
-                            <td>${room.location}</td>
-                            <td><strong>${room.price}</strong></td>
+                            <td>${prop.propertyType}</td>
+                            <td>${prop.neighborhoodName}, ${prop.cityName}</td>
+                            <td><strong>${prop.price}</strong></td>
                             <td>
-                                <span class="badge ${room.status == 'Available' ? 'badge-available' : 'badge-occupied'}">
-                                    ${room.status}
+                                <span class="badge ${prop.verified ? 'badge-available' : 'badge-occupied'}">
+                                    ${prop.verified ? 'Verified' : 'Pending'}
                                 </span>
                             </td>
                             <td>
-                                <a href="#" style="color: #2563eb; font-weight: 500; text-decoration: none; margin-right: 10px;">Edit</a>
+                                <a href="property-detail?id=${prop.propertyId}" style="color: #2563eb; font-weight: 500; text-decoration: none; margin-right: 10px;">View</a>
                                 <a href="#" style="color: #ef4444; font-weight: 500; text-decoration: none;">Delete</a>
                             </td>
                         </tr>
                     </c:forEach>
-                    <c:if test="${empty rooms}">
+                    <c:if test="${empty properties}">
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 3rem; color: #64748b;">
                                 No rooms found. Click "Add New Room" to get started!
