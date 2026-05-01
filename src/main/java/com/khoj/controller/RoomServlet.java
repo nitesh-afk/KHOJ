@@ -50,38 +50,56 @@ public class RoomServlet extends HttpServlet {
             return;
         }
 
-        // Capture Property Data (Updated to match new schema/DTO)
-        String title = request.getParameter("title");
-        String description = request.getParameter("description");
-        int neighborhoodId = Integer.parseInt(request.getParameter("neighborhoodId"));
-        int typeId = Integer.parseInt(request.getParameter("typeId"));
-        double price = Double.parseDouble(request.getParameter("price"));
-        String priceModel = request.getParameter("priceModel");
-        String furnishingStatus = request.getParameter("furnishingStatus");
-        String imageUrl = request.getParameter("imageUrl");
-
-        // Create Model
-        Property property = new Property();
-        property.setLandlordId(user.getId());
-        property.setNeighborhoodId(neighborhoodId);
-        property.setTypeId(typeId);
-        property.setTitle(title);
-        property.setDescription(description);
-        property.setPrice(price);
-        property.setPriceModel(priceModel);
-        property.setFurnishingStatus(furnishingStatus);
-
-        // Save to DB
-        int propertyId = propertyDAO.addProperty(property);
-
-        if (propertyId > 0) {
-            // Save primary image
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                propertyDAO.addPropertyImage(propertyId, imageUrl, true);
+        try {
+            String neighborhoodIdStr = request.getParameter("neighborhoodId");
+            String typeIdStr = request.getParameter("typeId");
+            
+            if (neighborhoodIdStr == null || neighborhoodIdStr.isEmpty() ||
+                typeIdStr == null || typeIdStr.isEmpty()) {
+                response.sendRedirect(request.getContextPath() + 
+                    "/views/landlord/add-room.jsp?error=missing_fields");
+                return;
             }
-            response.sendRedirect(request.getContextPath() + "/LandlordDashboard?msg=room_added");
-        } else {
-            response.sendRedirect(request.getContextPath() + "/views/landlord/add-room.jsp?error=failed");
+            
+            int neighborhoodId = Integer.parseInt(neighborhoodIdStr);
+            int typeId = Integer.parseInt(typeIdStr);
+            double price = Double.parseDouble(request.getParameter("price"));
+            String priceModel = request.getParameter("priceModel");
+            String furnishingStatus = request.getParameter("furnishingStatus");
+            
+            // Capture remaining Property Data
+            String title = request.getParameter("title");
+            String description = request.getParameter("description");
+            String imageUrl = request.getParameter("imageUrl");
+            
+            // Create Model
+            Property property = new Property();
+            property.setLandlordId(user.getId());
+            property.setNeighborhoodId(neighborhoodId);
+            property.setTypeId(typeId);
+            property.setTitle(title);
+            property.setDescription(description);
+            property.setPrice(price);
+            property.setPriceModel(priceModel);
+            property.setFurnishingStatus(furnishingStatus);
+
+            // Save to DB
+            int propertyId = propertyDAO.addProperty(property);
+
+            if (propertyId > 0) {
+                // Save primary image
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    propertyDAO.addPropertyImage(propertyId, imageUrl, true);
+                }
+                response.sendRedirect(request.getContextPath() + "/LandlordDashboard?msg=room_added");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/views/landlord/add-room.jsp?error=failed");
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + 
+                "/views/landlord/add-room.jsp?error=invalid_number");
+            return;
         }
     }
 }

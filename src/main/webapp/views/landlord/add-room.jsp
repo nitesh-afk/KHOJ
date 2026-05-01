@@ -242,18 +242,30 @@
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .form-group select {
+        .form-group select, .form-group-full select {
             appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231C1917' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 16px center;
             background-size: 16px;
             padding-right: 40px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 16px;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            background-color: var(--card-surface);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .form-group input:focus, 
         .form-group select:focus, 
         .form-group-full input:focus, 
+        .form-group-full select:focus,
         .form-group-full textarea:focus {
             border-color: var(--accent-gold);
             box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.15);
@@ -337,6 +349,23 @@
     <div class="main-content">
         <div class="header">
             <h1>Add New Listing</h1>
+            <c:if test="${not empty param.error}">
+              <div style="background:#FFE4E4; border-left:4px solid #E24B4A; 
+                           border-radius:0 10px 10px 0; color:#7B1D1D; 
+                           padding:14px 20px; margin-top:16px; margin-bottom:24px; font-weight:600;">
+                <c:choose>
+                  <c:when test="${param.error == 'missing_fields'}">
+                    Please fill in all required fields including neighborhood and property type.
+                  </c:when>
+                  <c:when test="${param.error == 'invalid_number'}">
+                    Invalid input. Please check all numeric fields.
+                  </c:when>
+                  <c:when test="${param.error == 'failed'}">
+                    Failed to save the listing. Please try again.
+                  </c:when>
+                </c:choose>
+              </div>
+            </c:if>
             <p class="subtitle">Fill in the details below to publish your property on KHOJ.</p>
         </div>
 
@@ -349,23 +378,49 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="price">Monthly Rent (Rs.)</label>
+                        <label for="price">Rent/Rate (Rs.)</label>
                         <input type="number" id="price" name="price" placeholder="5000" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="roomType">Room Type</label>
-                        <select id="roomType" name="roomType">
-                            <option value="Single">Single Room</option>
-                            <option value="Double">Double Room</option>
-                            <option value="Flat">Full Flat</option>
-                            <option value="Hostel">Hostel Bed</option>
+                        <label for="priceModel">Price Model</label>
+                        <select id="priceModel" name="priceModel" required>
+                            <option value="Monthly">Monthly Rent</option>
+                            <option value="Daily">Daily Rate</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="typeId">Property Type</label>
+                        <select id="typeId" name="typeId" required>
+                            <option value="">Select type...</option>
+                            <option value="1">Apartment</option>
+                            <option value="2">Hostel</option>
+                            <option value="3">Hotel</option>
+                            <option value="4">Villa</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="furnishingStatus">Furnishing Status</label>
+                        <select id="furnishingStatus" name="furnishingStatus" required>
+                            <option value="Fully Furnished">Fully Furnished</option>
+                            <option value="Semi Furnished">Semi Furnished</option>
+                            <option value="Unfurnished">Unfurnished</option>
                         </select>
                     </div>
 
                     <div class="form-group-full">
-                        <label for="location">Location / Area</label>
-                        <input type="text" id="location" name="location" placeholder="e.g., Koteshwor, Kathmandu" required>
+                        <label for="neighborhoodId">Location / Area</label>
+                        <select id="neighborhoodId" name="neighborhoodId" required>
+                            <option value="">Select neighborhood...</option>
+                            <option value="1">Thamel, Kathmandu</option>
+                            <option value="2">Koteshwor, Kathmandu</option>
+                            <option value="3">Lakeside, Pokhara</option>
+                            <option value="4">Mahendrapool, Pokhara</option>
+                            <option value="5">Biratnagar City, Biratnagar</option>
+                            <option value="6">Dharan Bazaar, Dharan</option>
+                        </select>
                     </div>
 
                     <div class="form-group-full">
