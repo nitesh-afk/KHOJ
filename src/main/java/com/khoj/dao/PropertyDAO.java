@@ -105,7 +105,7 @@ public class PropertyDAO {
                      "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
                      "JOIN property_types pt ON p.type_id = pt.type_id " +
                      "JOIN users u ON p.landlord_id = u.user_id " +
-                     "WHERE dt.theme_name = ?";
+                     "WHERE dt.theme_name = ? AND p.is_verified = TRUE";
         
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -167,7 +167,7 @@ public class PropertyDAO {
             "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
             "JOIN property_types pt ON p.type_id = pt.type_id " +
             "JOIN users u ON p.landlord_id = u.user_id " +
-            "WHERE 1=1 "
+            "WHERE p.is_verified = TRUE "
         );
 
         if (location != null && !location.isEmpty()) sql.append("AND (c.city_name LIKE ? OR n.neighborhood_name LIKE ?) ");

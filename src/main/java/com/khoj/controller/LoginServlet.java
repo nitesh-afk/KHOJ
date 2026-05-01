@@ -54,9 +54,9 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/LandlordDashboard");
             } else if ("TENANT".equalsIgnoreCase(role)) {
                 // Point to the servlet that fetches property discovery data
-                response.sendRedirect(request.getContextPath() + "/home");
+                response.sendRedirect(request.getContextPath() + "/search");
             } else {
-                response.sendRedirect("home");
+                response.sendRedirect("search");
             }
         } else {
             response.sendRedirect("views/auth/login.jsp?error=invalid");

@@ -32,12 +32,12 @@ public class ApplyServlet extends HttpServlet {
             boolean success = appDAO.applyForProperty(user.getId(), propertyId);
 
             if (success) {
-                response.sendRedirect("home?msg=applied");
+                response.sendRedirect("search?msg=applied");
             } else {
                 response.sendRedirect("property-detail?id=" + propertyId + "&error=failed");
             }
         } else {
-            response.sendRedirect("home");
+            response.sendRedirect("search");
         }
     }
 }

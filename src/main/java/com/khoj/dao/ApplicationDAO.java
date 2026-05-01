@@ -37,7 +37,7 @@ public class ApplicationDAO {
             pst.setInt(1, landlordId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    apps.add(mapResultSetToApplication(rs, "student_name", "student_email", null, null));
+                    apps.add(mapResultSetToApplication(rs, "tenant_name", "tenant_email", null, null));
                 }
             }
         } catch (Exception e) { e.printStackTrace(); }

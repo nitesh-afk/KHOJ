@@ -29,9 +29,9 @@ public class PropertyDetailServlet extends HttpServlet {
                 Property property = propertyDAO.getPropertyById(propertyId);
                 
                 if (property != null) {
-                    request.setAttribute("property", property);
+                    request.setAttribute("room", property);
                     // amenities and imageUrls are already inside the property object
-                    request.getRequestDispatcher("/views/property-detail.jsp").forward(request, response);
+                    request.getRequestDispatcher("/views/tenant/room-details.jsp").forward(request, response);
                 } else {
                     response.sendRedirect("home?error=PropertyNotFound");
                 }

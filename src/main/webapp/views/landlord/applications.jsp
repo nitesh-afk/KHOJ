@@ -389,10 +389,10 @@
                     <c:forEach var="app" items="${applications}">
                         <tr>
                             <td>
-                                <strong style="font-weight: 600;">${app.studentName}</strong><br>
-                                <small style="color: var(--text-secondary); font-size: 0.82rem;">${app.studentEmail}</small>
+                                <strong style="font-weight: 600;">${app.tenantName}</strong><br>
+                                <small style="color: var(--text-secondary); font-size: 0.82rem;">${app.tenantEmail}</small>
                             </td>
-                            <td style="font-weight: 500;">${app.roomTitle}</td>
+                            <td style="font-weight: 500;">${app.propertyTitle}</td>
                             <td>
                                 <span class="badge badge-${app.status}">
                                     ${app.status}
