@@ -1,26 +1,36 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <style>
     .mega-footer {
-        background-color: #f5f5f5;
-        padding: 50px 0 30px;
-        color: #333;
-        font-size: 0.9rem;
-        margin-top: 60px;
-        border-top: 1px solid #ddd;
+        background-color: #1C1917;
+        padding: 80px 0 30px;
+        color: #FFFFFF;
+        font-family: 'Inter', sans-serif;
     }
 
     .footer-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 40px;
-        margin-bottom: 40px;
+        margin-bottom: 60px;
+    }
+
+    .footer-col .footer-logo {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #C9A96E;
+        margin-bottom: 20px;
+        display: inline-block;
+        text-decoration: none;
     }
 
     .footer-col h4 {
+        font-family: 'Inter', sans-serif;
         font-size: 1rem;
         font-weight: 700;
-        margin-bottom: 20px;
-        color: #1a1a1a;
+        margin-bottom: 24px;
+        color: #FFFFFF;
+        letter-spacing: 0.5px;
     }
 
     .footer-col ul {
@@ -30,25 +40,25 @@
     }
 
     .footer-col ul li {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
     .footer-col ul li a {
-        color: #003580;
+        color: rgba(255,255,255,0.6);
         text-decoration: none;
-        transition: 0.2s;
+        transition: color 0.3s ease;
+        font-size: 0.95rem;
     }
 
     .footer-col ul li a:hover {
-        color: #001e4a;
-        text-decoration: underline;
+        color: #FFFFFF;
     }
 
     .footer-bottom {
-        border-top: 1px solid #ddd;
-        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,0.15);
+        padding-top: 30px;
         text-align: center;
-        color: #666;
+        color: rgba(255,255,255,0.5);
         font-size: 0.85rem;
     }
 </style>
@@ -56,6 +66,12 @@
 <footer class="mega-footer">
     <div class="container">
         <div class="footer-grid">
+            <div class="footer-col" style="grid-column: span 1;">
+                <a href="home" class="footer-logo">KHOJ</a>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; line-height: 1.6; margin-top: 0;">
+                    Your premium real estate and travel portal. Discover verified homes, apartments, and villas across Nepal.
+                </p>
+            </div>
             <div class="footer-col">
                 <h4>Support</h4>
                 <ul>
