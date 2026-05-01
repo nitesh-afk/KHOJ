@@ -66,7 +66,7 @@
     <div class="detail-container" style="max-width: 1140px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 40px;">
         <div>
             <div style="position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 45px rgba(0,0,0,0.12);">
-                <img src="${not empty room.imageUrl ? room.imageUrl : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1000&q=80'}" class="main-img" alt="${room.title}" style="width: 100%; height: 500px; object-fit: cover;">
+                <img src="${not empty room.imageUrls ? room.imageUrls[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1000&q=80'}" class="main-img" alt="${room.title}" style="width: 100%; height: 500px; object-fit: cover;">
                 <div style="position: absolute; bottom: 30px; left: 30px; background: rgba(255,255,255,0.9); backdrop-filter: blur(5px); padding: 10px 20px; border-radius: 12px; font-weight: 800; color: #003580; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     <i class="fa-solid fa-camera"></i> Verified Property Image
                 </div>
@@ -75,7 +75,7 @@
             <div style="margin-top: 30px;">
                 <h1 style="font-size: 2.8rem; font-weight: 800; color: #1a1a1a; margin: 0 0 10px; letter-spacing: -1px;">${room.title}</h1>
                 <p style="color: #64748b; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; margin-bottom: 30px;">
-                    <i class="fa-solid fa-location-dot" style="color: #003580;"></i> ${room.location}
+                    <i class="fa-solid fa-location-dot" style="color: #003580;"></i> ${room.neighborhoodName}, ${room.cityName}
                 </p>
                 
                 <div style="background: white; border-radius: 16px; padding: 30px; border: 1px solid #eee; margin-bottom: 30px;">
@@ -89,7 +89,7 @@
                     <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; text-align: center;">
                         <i class="fa-solid fa-bed" style="font-size: 1.5rem; color: #003580; margin-bottom: 10px;"></i>
                         <div style="font-size: 0.8rem; color: #777; text-transform: uppercase; font-weight: 700;">Type</div>
-                        <div style="font-weight: 800; color: #1a1a1a;">${room.roomType}</div>
+                        <div style="font-weight: 800; color: #1a1a1a;">${room.propertyType}</div>
                     </div>
                     <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #eee; text-align: center;">
                         <i class="fa-solid fa-shield-check" style="font-size: 1.5rem; color: #27ae60; margin-bottom: 10px;"></i>
@@ -122,7 +122,7 @@
                 </div>
 
                 <form action="${pageContext.request.contextPath}/ApplyServlet" method="post">
-                    <input type="hidden" name="roomId" value="${room.id}">
+                    <input type="hidden" name="propertyId" value="${room.propertyId}">
                     <button type="submit" class="apply-btn" style="background: #003580; color: white; border: none; width: 100%; padding: 18px; border-radius: 12px; font-size: 1.2rem; font-weight: 800; cursor: pointer; box-shadow: 0 8px 25px rgba(0, 53, 128, 0.2); transition: 0.3s;">
                         Apply to Rent Now
                     </button>
