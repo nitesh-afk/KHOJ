@@ -1,7 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.ApplicationDAO;
 import com.khoj.model.User;
+import com.khoj.service.ApplicationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @WebServlet("/ApplyServlet")
 public class ApplyServlet extends HttpServlet {
-    private ApplicationDAO appDAO = new ApplicationDAO();
+    private final ApplicationService appService = new ApplicationService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -29,7 +29,7 @@ public class ApplyServlet extends HttpServlet {
         String propertyIdStr = request.getParameter("propertyId");
         if (propertyIdStr != null) {
             int propertyId = Integer.parseInt(propertyIdStr);
-            boolean success = appDAO.applyForProperty(user.getId(), propertyId);
+            boolean success = appService.applyForProperty(user.getId(), propertyId);
 
             if (success) {
                 response.sendRedirect("search?msg=applied");

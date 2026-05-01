@@ -1,8 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.UserDAO;
 import com.khoj.model.User;
-import com.khoj.util.SecurityUtil;
+import com.khoj.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,7 +12,7 @@ import java.io.IOException;
 
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
-    private UserDAO userDAO = new UserDAO();
+    private final UserService userService = new UserService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -28,14 +27,9 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
-        User user = userDAO.getUserByEmail(email);
-        boolean isValid = false;
+        User user = userService.authenticate(email, password);
 
         if (user != null) {
-            isValid = SecurityUtil.verifyPassword(password, user.getPassword());
-        }
-
-        if (isValid) {
             // 1. Status Check (RBAC requirement)
             if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
                 response.sendRedirect("views/auth/login.jsp?error=account_deactivated");

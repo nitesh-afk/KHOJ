@@ -1,7 +1,6 @@
 package com.khoj.controller;
 
-import com.khoj.dao.PropertyDAO;
-import com.khoj.model.Property;
+import com.khoj.service.PropertyService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,20 +8,19 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/home")
 public class HomeServlet extends HttpServlet {
-    private PropertyDAO propertyDAO = new PropertyDAO();
+    private final PropertyService propertyService = new PropertyService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
         // Fetch data for the horizontal swimlanes
-        request.setAttribute("vibes", propertyDAO.getAllThemes());
-        request.setAttribute("verifiedProperties", propertyDAO.getVerifiedProperties(8));
-        request.setAttribute("propertyTypes", propertyDAO.getAllPropertyTypes());
+        request.setAttribute("vibes", propertyService.getAllThemes());
+        request.setAttribute("verifiedProperties", propertyService.getVerifiedProperties(8));
+        request.setAttribute("propertyTypes", propertyService.getAllPropertyTypes());
 
         // Forward to the refactored landing page
         request.getRequestDispatcher("index.jsp").forward(request, response);

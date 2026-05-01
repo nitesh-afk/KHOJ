@@ -1,9 +1,9 @@
 package com.khoj.controller;
 
-import com.khoj.dao.AdminDAO;
-import com.khoj.dao.PropertyDAO;
-import com.khoj.dao.UserDAO;
 import com.khoj.model.User;
+import com.khoj.service.AdminService;
+import com.khoj.service.PropertyService;
+import com.khoj.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,11 +13,11 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet("/AdminServlet")
+@WebServlet({"/AdminServlet", "/admin/rooms", "/admin/users"})
 public class AdminServlet extends HttpServlet {
-    private AdminDAO adminDAO = new AdminDAO();
-    private UserDAO userDAO = new UserDAO();
-    private PropertyDAO propertyDAO = new PropertyDAO();
+    private final AdminService adminService = new AdminService();
+    private final UserService userService = new UserService();
+    private final PropertyService propertyService = new PropertyService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -28,14 +28,27 @@ public class AdminServlet extends HttpServlet {
             return;
         }
 
-        // Fetch Global Stats
-        Map<String, Integer> summary = adminDAO.getSystemSummary();
+        String path = request.getServletPath();
+
+        if ("/admin/rooms".equals(path)) {
+            request.setAttribute("rooms", propertyService.getAllProperties());
+            request.getRequestDispatcher("/views/admin/rooms.jsp").forward(request, response);
+            return;
+        }
+
+        if ("/admin/users".equals(path)) {
+            request.setAttribute("users", userService.getAllUsers());
+            request.getRequestDispatcher("/views/admin/users.jsp").forward(request, response);
+            return;
+        }
+
+        // Fetch Global Stats for Dashboard
+        Map<String, Integer> summary = adminService.getSystemSummary();
         request.setAttribute("stats", summary);
 
         // Fetch User and Property tables
-        request.setAttribute("users", userDAO.getAllUsers());
-        
-        request.setAttribute("properties", propertyDAO.getAllProperties());
+        request.setAttribute("users", userService.getAllUsers());
+        request.setAttribute("properties", propertyService.getAllProperties());
 
         request.getRequestDispatcher("/views/admin/dashboard.jsp").forward(request, response);
     }
@@ -55,18 +68,18 @@ public class AdminServlet extends HttpServlet {
         switch (action) {
             case "deleteUser":
                 int userId = Integer.parseInt(request.getParameter("userId"));
-                userDAO.deleteUser(userId);
+                userService.deleteUser(userId);
                 break;
             
             case "verifyProperty":
                 int propertyId = Integer.parseInt(request.getParameter("propertyId"));
                 boolean verify = Boolean.parseBoolean(request.getParameter("verify"));
-                adminDAO.verifyProperty(propertyId, verify);
+                adminService.verifyProperty(propertyId, verify);
                 break;
                 
             case "deactivateUser":
                 int uId = Integer.parseInt(request.getParameter("userId"));
-                userDAO.updateUserStatus(uId, "DEACTIVATED");
+                userService.updateUserStatus(uId, "DEACTIVATED");
                 break;
         }
 

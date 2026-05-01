@@ -1,8 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.UserDAO;
 import com.khoj.model.User;
-import com.khoj.util.SecurityUtil;
+import com.khoj.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +11,7 @@ import java.io.IOException;
 
 @WebServlet("/RegisterServlet")
 public class RegisterServlet extends HttpServlet {
-    private final UserDAO userDAO = new UserDAO();
+    private final UserService userService = new UserService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -34,15 +33,18 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
-        // 3. Secure the Password (Hashing)
-        String hashedPassword = SecurityUtil.hashPassword(password);
+        // 3. Check if email already exists (Business Logic)
+        if (userService.isEmailTaken(email)) {
+            response.sendRedirect("views/auth/register.jsp?error=email_taken");
+            return;
+        }
 
-        // 4. Create User Model Object
-        User newUser = new User(fullName, email, hashedPassword, role, "ACTIVE");
+        // 4. Create User Model Object (Note: Service will hash the password)
+        User newUser = new User(fullName, email, password, role, "ACTIVE");
 
-        // 5. Use DAO to save to Database
+        // 5. Use Service to save to Database
         try {
-            boolean success = userDAO.registerUser(newUser);
+            boolean success = userService.registerUser(newUser);
             if (success) {
                 response.sendRedirect("views/auth/login.jsp?msg=success");
             } else {
@@ -53,4 +55,4 @@ public class RegisterServlet extends HttpServlet {
             response.sendRedirect("views/auth/register.jsp?error=exception");
         }
     }
-}
+}

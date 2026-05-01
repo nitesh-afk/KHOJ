@@ -327,7 +327,7 @@
         <ul class="nav-links">
             <li><a href="${pageContext.request.contextPath}/LandlordDashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
             <li><a href="${pageContext.request.contextPath}/my-rooms" class="active"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
-            <li><a href="${pageContext.request.contextPath}/views/landlord/add-room.jsp"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
+            <li><a href="${pageContext.request.contextPath}/add-room"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
             <li><a href="${pageContext.request.contextPath}/applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
         </ul>
         <div class="sidebar-bottom">
@@ -345,7 +345,7 @@
     <div class="main-content">
         <div class="header">
             <h1>Property Inventory</h1>
-            <a href="${pageContext.request.contextPath}/views/landlord/add-room.jsp" class="btn-gold">+ Add New Property</a>
+            <a href="${pageContext.request.contextPath}/add-room" class="btn-gold">+ Add New Property</a>
         </div>
 
         <div class="table-card">
@@ -388,7 +388,7 @@
                                     <i class="fa-solid fa-house-chimney-crack"></i>
                                     <h3>No listings yet</h3>
                                     <p>Add your first property to start receiving applications.</p>
-                                    <a href="${pageContext.request.contextPath}/views/landlord/add-room.jsp" class="btn-gold">Add New Listing</a>
+                                    <a href="${pageContext.request.contextPath}/add-room" class="btn-gold">Add New Listing</a>
                                 </div>
                             </td>
                         </tr>

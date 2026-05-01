@@ -1,8 +1,8 @@
 package com.khoj.controller;
 
-import com.khoj.dao.ApplicationDAO;
 import com.khoj.model.Application;
 import com.khoj.model.User;
+import com.khoj.service.ApplicationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @WebServlet({"/ApplicationServlet", "/applications"})
 public class ApplicationServlet extends HttpServlet {
-    private ApplicationDAO appDAO = new ApplicationDAO();
+    private final ApplicationService appService = new ApplicationService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -28,7 +28,7 @@ public class ApplicationServlet extends HttpServlet {
             return;
         }
 
-        List<Application> apps = appDAO.getApplicationsByLandlord(user.getId());
+        List<Application> apps = appService.getApplicationsByLandlord(user.getId());
         request.setAttribute("applications", apps);
         
         request.getRequestDispatcher("/views/landlord/applications.jsp").forward(request, response);
@@ -49,7 +49,7 @@ public class ApplicationServlet extends HttpServlet {
         int appId = Integer.parseInt(request.getParameter("appId"));
         String status = request.getParameter("status"); // ACCEPTED or REJECTED
 
-        boolean success = appDAO.updateApplicationStatus(appId, status);
+        boolean success = appService.updateApplicationStatus(appId, status);
         
         if (success) {
             response.sendRedirect(request.getContextPath() + "/applications?msg=status_updated");

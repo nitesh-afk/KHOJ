@@ -331,29 +331,29 @@
                                 <tr>
                                     <td>
                                         <div class="cell-bold">${room.title}</div>
-                                        <div class="cell-muted">Owner ID: #${room.ownerId}</div>
+                                        <div class="cell-muted">Owner ID: #${room.landlordId}</div>
                                     </td>
-                                    <td>${room.location}</td>
+                                    <td>${room.neighborhoodName}</td>
                                     <td>Rs. ${room.price}</td>
                                     <td>
-                                        <span class="badge ${room.approved ? 'badge-success' : 'badge-warning'}">
-                                            ${room.approved ? 'APPROVED' : 'PENDING APPROVAL'}
+                                        <span class="badge ${room.verified ? 'badge-success' : 'badge-warning'}">
+                                            ${room.verified ? 'APPROVED' : 'PENDING APPROVAL'}
                                         </span>
                                     </td>
                                     <td>
-                                        <c:if test="${!room.approved}">
+                                        <c:if test="${!room.verified}">
                                             <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                                <input type="hidden" name="action" value="approveRoom">
-                                                <input type="hidden" name="roomId" value="${room.id}">
-                                                <input type="hidden" name="approve" value="true">
+                                                <input type="hidden" name="action" value="verifyProperty">
+                                                <input type="hidden" name="propertyId" value="${room.propertyId}">
+                                                <input type="hidden" name="verify" value="true">
                                                 <button type="submit" class="btn btn-approve-lg">Approve Listing</button>
                                             </form>
                                         </c:if>
-                                        <c:if test="${room.approved}">
+                                        <c:if test="${room.verified}">
                                             <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                                <input type="hidden" name="action" value="approveRoom">
-                                                <input type="hidden" name="roomId" value="${room.id}">
-                                                <input type="hidden" name="approve" value="false">
+                                                <input type="hidden" name="action" value="verifyProperty">
+                                                <input type="hidden" name="propertyId" value="${room.propertyId}">
+                                                <input type="hidden" name="verify" value="false">
                                                 <button type="submit" class="btn btn-revoke-lg">Revoke</button>
                                             </form>
                                         </c:if>

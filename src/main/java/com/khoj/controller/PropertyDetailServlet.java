@@ -1,7 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.PropertyDAO;
 import com.khoj.model.Property;
+import com.khoj.service.PropertyService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @WebServlet("/property-detail")
 public class PropertyDetailServlet extends HttpServlet {
-    private PropertyDAO propertyDAO = new PropertyDAO();
+    private final PropertyService propertyService = new PropertyService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -24,9 +24,9 @@ public class PropertyDetailServlet extends HttpServlet {
             try {
                 int propertyId = Integer.parseInt(idParam);
                 
-                // Fetch the main property (DAO already joins relational strings 
+                // Fetch the main property (Service already joins relational strings 
                 // and populates amenities/images in getPropertyById)
-                Property property = propertyDAO.getPropertyById(propertyId);
+                Property property = propertyService.getPropertyById(propertyId);
                 
                 if (property != null) {
                     request.setAttribute("room", property);

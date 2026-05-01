@@ -348,7 +348,7 @@
         <ul class="nav-links">
             <li><a href="${pageContext.request.contextPath}/LandlordDashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
             <li><a href="${pageContext.request.contextPath}/my-rooms"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
-            <li><a href="${pageContext.request.contextPath}/views/landlord/add-room.jsp"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
+            <li><a href="${pageContext.request.contextPath}/add-room"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
             <li><a href="${pageContext.request.contextPath}/applications" class="active"><i class="fa-solid fa-inbox"></i> Applications</a></li>
         </ul>
         <div class="sidebar-bottom">

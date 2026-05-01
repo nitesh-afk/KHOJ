@@ -1,8 +1,8 @@
 package com.khoj.controller;
 
-import com.khoj.dao.ApplicationDAO;
 import com.khoj.model.Application;
 import com.khoj.model.User;
+import com.khoj.service.ApplicationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @WebServlet({"/BookingServlet", "/my-bookings"})
 public class BookingServlet extends HttpServlet {
-    private ApplicationDAO appDAO = new ApplicationDAO();
+    private final ApplicationService appService = new ApplicationService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -28,7 +28,7 @@ public class BookingServlet extends HttpServlet {
             return;
         }
 
-        List<Application> myApplications = appDAO.getApplicationsByTenant(user.getId());
+        List<Application> myApplications = appService.getApplicationsByTenant(user.getId());
         request.setAttribute("myApplications", myApplications);
         
         request.getRequestDispatcher("/views/tenant/my-bookings.jsp").forward(request, response);

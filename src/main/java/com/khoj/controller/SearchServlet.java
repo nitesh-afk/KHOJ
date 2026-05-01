@@ -1,7 +1,7 @@
 package com.khoj.controller;
 
-import com.khoj.dao.PropertyDAO;
 import com.khoj.model.Property;
+import com.khoj.service.PropertyService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @WebServlet({"/SearchServlet", "/search"})
 public class SearchServlet extends HttpServlet {
-    private PropertyDAO propertyDAO = new PropertyDAO();
+    private final PropertyService propertyService = new PropertyService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,10 +26,10 @@ public class SearchServlet extends HttpServlet {
         List<Property> properties;
         
         if (theme != null && !theme.isEmpty()) {
-            properties = propertyDAO.getPropertiesByTheme(theme);
+            properties = propertyService.getPropertiesByTheme(theme);
         } else {
-            // Advanced search using PropertyDAO
-            properties = propertyDAO.searchProperties(location, type, priceModel);
+            // Advanced search using Service
+            properties = propertyService.searchProperties(location, type, priceModel);
         }
 
         request.setAttribute("properties", properties);

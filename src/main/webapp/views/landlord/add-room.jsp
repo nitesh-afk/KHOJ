@@ -1,6 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ page import="com.khoj.dao.PropertyDAO" %>
+<%@ page import="com.khoj.model.PropertyType" %>
+<%@ page import="java.util.List" %>
+<%-- Property types are now loaded by the /add-room servlet GET handler --%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,10 +252,9 @@
             background-repeat: no-repeat;
             background-position: right 16px center;
             background-size: 16px;
-            padding-right: 40px;
             width: 100%;
             box-sizing: border-box;
-            padding: 13px 16px;
+            padding: 13px 40px 13px 16px;
             border: 1px solid var(--card-border);
             border-radius: 10px;
             font-family: 'Inter', sans-serif;
@@ -331,7 +334,7 @@
         <ul class="nav-links">
             <li><a href="${pageContext.request.contextPath}/LandlordDashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
             <li><a href="${pageContext.request.contextPath}/my-rooms"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
-            <li><a href="${pageContext.request.contextPath}/views/landlord/add-room.jsp" class="active"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
+            <li><a href="${pageContext.request.contextPath}/add-room" class="active"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
             <li><a href="${pageContext.request.contextPath}/applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
         </ul>
         <div class="sidebar-bottom">
@@ -353,16 +356,18 @@
               <div style="background:#FFE4E4; border-left:4px solid #E24B4A; 
                            border-radius:0 10px 10px 0; color:#7B1D1D; 
                            padding:14px 20px; margin-top:16px; margin-bottom:24px; font-weight:600;">
+                <i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>
                 <c:choose>
-                  <c:when test="${param.error == 'missing_fields'}">
-                    Please fill in all required fields including neighborhood and property type.
+                  <c:when test="${not empty sessionScope.formError}">
+                    ${sessionScope.formError}
+                    <% session.removeAttribute("formError"); %>
                   </c:when>
-                  <c:when test="${param.error == 'invalid_number'}">
-                    Invalid input. Please check all numeric fields.
-                  </c:when>
-                  <c:when test="${param.error == 'failed'}">
-                    Failed to save the listing. Please try again.
-                  </c:when>
+                  <c:when test="${param.error == 'missing_fields'}">Please fill in all required fields.</c:when>
+                  <c:when test="${param.error == 'invalid_number'}">Invalid input. Please check all numeric fields.</c:when>
+                  <c:when test="${param.error == 'db_setup'}">Database setup issue. Please contact your administrator.</c:when>
+                  <c:when test="${param.error == 'failed'}">Failed to save the listing. Please check server logs and try again.</c:when>
+                  <c:when test="${param.error == 'server_error'}">An unexpected server error occurred. Please try again.</c:when>
+                  <c:otherwise>An error occurred. Please try again.</c:otherwise>
                 </c:choose>
               </div>
             </c:if>
@@ -370,7 +375,7 @@
         </div>
 
         <div class="form-card">
-            <form action="${pageContext.request.contextPath}/RoomServlet" method="post">
+            <form action="${pageContext.request.contextPath}/RoomServlet" method="post" id="addRoomForm">
                 <div class="form-grid">
                     <div class="form-group-full">
                         <label for="title">Property Title</label>
@@ -394,10 +399,9 @@
                         <label for="typeId">Property Type</label>
                         <select id="typeId" name="typeId" required>
                             <option value="">Select type...</option>
-                            <option value="1">Apartment</option>
-                            <option value="2">Hostel</option>
-                            <option value="3">Hotel</option>
-                            <option value="4">Villa</option>
+                            <c:forEach var="type" items="${propertyTypes}">
+                                <option value="${type.typeId}">${type.name}</option>
+                            </c:forEach>
                         </select>
                     </div>
 
@@ -411,16 +415,8 @@
                     </div>
 
                     <div class="form-group-full">
-                        <label for="neighborhoodId">Location / Area</label>
-                        <select id="neighborhoodId" name="neighborhoodId" required>
-                            <option value="">Select neighborhood...</option>
-                            <option value="1">Thamel, Kathmandu</option>
-                            <option value="2">Koteshwor, Kathmandu</option>
-                            <option value="3">Lakeside, Pokhara</option>
-                            <option value="4">Mahendrapool, Pokhara</option>
-                            <option value="5">Biratnagar City, Biratnagar</option>
-                            <option value="6">Dharan Bazaar, Dharan</option>
-                        </select>
+                        <label for="neighborhoodName">Location / Area</label>
+                        <input type="text" id="neighborhoodName" name="neighborhoodName" placeholder="e.g. Thamel, Kathmandu" required>
                     </div>
 
                     <div class="form-group-full">
