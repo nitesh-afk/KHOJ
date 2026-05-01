@@ -5,80 +5,384 @@
 <head>
     <meta charset="UTF-8">
     <title>User Management | KHOJ Admin</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .admin-sidebar { background-color: #0f172a; color: white; }
-        .admin-sidebar a { color: #94a3b8; }
-        .admin-sidebar a:hover, .admin-sidebar a.active { color: white; background: #1e293b; }
-        .btn-action { border: none; padding: 0.5rem; border-radius: 0.25rem; cursor: pointer; font-weight: 600; font-size: 0.75rem; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAF9F6;
+            color: #1C1917;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background-color: #0F0E0C;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar-top { flex: 1; }
+        .logo-section { margin-bottom: 16px; }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #C9A96E;
+        }
+        .logo-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 4px;
+        }
+        .sidebar-divider {
+            border: 0;
+            border-bottom: 1px solid rgba(201, 169, 110, 0.2);
+            margin: 16px 0;
+        }
+        .superuser-badge {
+            background: rgba(201, 169, 110, 0.1);
+            border: 1px solid rgba(201, 169, 110, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+        .superuser-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #C9A96E;
+            color: #1C1917;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        .superuser-info { display: flex; flex-direction: column; }
+        .superuser-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .superuser-role {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            color: #C9A96E;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .nav-links a {
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.9rem;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .nav-links a i {
+            font-size: 0.9rem;
+            width: 16px;
+            text-align: center;
+        }
+        .nav-links a:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .nav-links a.active {
+            color: #FFFFFF;
+            background: #1C1917;
+            border-left: 3px solid #C9A96E;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 16px;
+        }
+        .sidebar-bottom a {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.9rem;
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: color 0.2s;
+        }
+        .sidebar-bottom a i {
+            width: 16px;
+            text-align: center;
+        }
+        .sidebar-bottom a:hover { color: #FFB4A2; }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 40px 48px;
+            width: calc(100% - 260px);
+            min-height: 100vh;
+        }
+
+        /* Top Header */
+        .header {
+            margin-bottom: 40px;
+        }
+        .header-eyebrow {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #C9A96E;
+            margin-bottom: 8px;
+        }
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: #1C1917;
+            font-weight: 700;
+        }
+        .header p.subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: #6B6560;
+            margin-top: 8px;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            background: #D8F3DC;
+            border-left: 4px solid #2D6A4F;
+            border-radius: 0 10px 10px 0;
+            color: #2D6A4F;
+            font-weight: 600;
+            padding: 14px 20px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Sections & Tables */
+        .section-wrapper {
+            background: #FFFFFF;
+            border: 1px solid #EDE9E3;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #F7F4EF;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #6B6560;
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+        }
+        th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+        th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+        td {
+            padding: 14px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: #1C1917;
+            border-bottom: 1px solid #EDE9E3;
+            transition: background 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #FDFAF6; }
+
+        .cell-id { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #6B6560; font-weight: 600; }
+        .cell-bold { font-weight: 600; }
+        .cell-muted { color: #6B6560; font-size: 0.8rem; margin-top: 4px; }
+
+        /* Badges */
+        .badge {
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+        .badge-success { background: #D8F3DC; color: #2D6A4F; }
+        .badge-info { background: #E8F4FD; color: #1E40AF; }
+        .badge-role { background: #F0EDE8; color: #6B6560; }
+
+        /* Buttons */
+        .btn {
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-verify {
+            background: #C9A96E;
+            color: #1C1917;
+            border: none;
+            padding: 7px 16px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .btn-delete-lg {
+            background: #FFE4E4;
+            color: #7B1D1D;
+            border: 1px solid #FFC9C9;
+            padding: 7px 16px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-left: 6px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 0;
+            color: #C9A96E;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.6;
+            margin-bottom: 16px;
+        }
+        .empty-state p {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            color: #6B6560;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar admin-sidebar">
-        <div class="sidebar-logo" style="color: #3b82f6;">KHOJ Admin</div>
-        <ul class="nav-links">
-            <li><a href="${pageContext.request.contextPath}/admin/dashboard">Overview</a></li>
-            <li><a href="${pageContext.request.contextPath}/admin/users" class="active">User Management</a></li>
-            <li><a href="${pageContext.request.contextPath}/admin/rooms">Room Moderation</a></li>
-            <li><a href="${pageContext.request.contextPath}/views/auth/login.jsp" style="margin-top: 2rem; color: #ef4444;">System Logout</a></li>
-        </ul>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo-section">
+                <div class="logo">KHOJ</div>
+                <div class="logo-subtitle">Admin Control</div>
+            </div>
+            <hr class="sidebar-divider">
+            <div class="superuser-badge">
+                <div class="superuser-avatar">A</div>
+                <div class="superuser-info">
+                    <span class="superuser-name">System Admin</span>
+                    <span class="superuser-role">SUPERUSER</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/users" class="active"><i class="fa-solid fa-users"></i> User Governance</a></li>
+                <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="${pageContext.request.contextPath}/LogoutServlet"><i class="fa-solid fa-power-off"></i> Shutdown Session</a>
+        </div>
     </div>
 
+    <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="header">
-            <h1>User Management</h1>
+            <div class="header-eyebrow">Admin Control</div>
+            <h1>User Governance</h1>
+            <p class="subtitle">Manage user accounts, roles, and verification status.</p>
         </div>
 
         <c:if test="${not empty param.msg}">
-            <div class="badge badge-available" style="margin-bottom: 1.5rem; width: 100%; text-align: center; display: block; padding: 1rem;">
-                Action processed: ${param.msg}
+            <div class="alert-banner">
+                <i class="fa-solid fa-circle-check"></i> Action processed: ${param.msg}
             </div>
         </c:if>
 
-        <div class="activity-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User Info</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="user" items="${users}">
-                        <tr>
-                            <td>#${user.id}</td>
-                            <td>
-                                <strong>${user.fullName}</strong><br>
-                                <small>${user.email}</small>
-                            </td>
-                            <td><span class="badge" style="background: #e2e8f0;">${user.role}</span></td>
-                            <td>
-                                <span class="badge ${user.status == 'VERIFIED' ? 'badge-available' : ''}">
-                                    ${user.status}
-                                </span>
-                            </td>
-                            <td>
-                                <c:if test="${user.role == 'LANDLORD' && user.status != 'VERIFIED'}">
-                                    <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                        <input type="hidden" name="action" value="verifyLandlord">
-                                        <input type="hidden" name="userId" value="${user.id}">
-                                        <button type="submit" class="btn-action" style="background: #dcfce7; color: #166534;">Verify</button>
-                                    </form>
-                                </c:if>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                    <input type="hidden" name="action" value="deleteUser">
-                                    <input type="hidden" name="userId" value="${user.id}">
-                                    <button type="submit" class="btn-action" style="background: #fee2e2; color: #991b1b; margin-left: 5px;" onclick="return confirm('Delete this user permanently?')">Delete</button>
-                                </form>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+        <div class="section-wrapper">
+            <c:choose>
+                <c:when test="${empty users}">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-users"></i>
+                        <p>No users found</p>
+                    </div>
+                </c:when>
+                <c:otherwise>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User Info</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="user" items="${users}">
+                                <tr>
+                                    <td class="cell-id">#${user.id}</td>
+                                    <td>
+                                        <div class="cell-bold">${user.fullName}</div>
+                                        <div class="cell-muted">${user.email}</div>
+                                    </td>
+                                    <td><span class="badge badge-role">${user.role}</span></td>
+                                    <td>
+                                        <span class="badge ${user.status == 'VERIFIED' ? 'badge-success' : user.status == 'ACTIVE' ? 'badge-info' : 'badge-role'}">
+                                            ${user.status}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <c:if test="${user.role == 'LANDLORD' && user.status != 'VERIFIED'}">
+                                            <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                                <input type="hidden" name="action" value="verifyLandlord">
+                                                <input type="hidden" name="userId" value="${user.id}">
+                                                <button type="submit" class="btn btn-verify">Verify</button>
+                                            </form>
+                                        </c:if>
+                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="deleteUser">
+                                            <input type="hidden" name="userId" value="${user.id}">
+                                            <button type="submit" class="btn btn-delete-lg" onclick="return confirm('Delete this user permanently?')">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:otherwise>
+            </c:choose>
         </div>
     </div>
 </body>
