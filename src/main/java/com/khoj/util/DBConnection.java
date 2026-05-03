@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/khoj_db";
+    private static final String URL = "jdbc:mysql://localhost:3307/khoj_db";
     private static final String USER = "root";
-    private static final String PASSWORD = "12345678";
+    private static final String PASSWORD = "1234";
 
     public static Connection getConnection() throws SQLException, ClassNotFoundException {
         // Load MySQL Driver explicitly
