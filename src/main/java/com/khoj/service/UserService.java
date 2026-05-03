@@ -9,7 +9,7 @@ import java.util.List;
  * Service class for handling User-related business logic.
  * This layer sits between the Controller (Servlet) and the Data Access Object (DAO).
  */
-public class UserService {
+public class UserService { // Abhiyan
     private final UserDAO userDAO = new UserDAO();
 
     /**
