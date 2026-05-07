@@ -13,106 +13,45 @@
     <!-- Using the global style and dashboard CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/dashboard.css">
-    
-    <style>
-        .table-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            padding: 20px;
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-family: 'Inter', sans-serif;
-        }
-        th, td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        th {
-            font-weight: 700;
-            color: #475569;
-            background-color: #f8fafc;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-        }
-        tr:hover {
-            background-color: #f8fafc;
-        }
-        .status-unread {
-            color: #b45309;
-            background: #fef3c7;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-        .status-archived {
-            color: #475569;
-            background: #f1f5f9;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-        .btn-action {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-        .btn-archive {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .btn-archive:hover {
-            background: #ef4444;
-            color: white;
-            transform: translateY(-2px);
-        }
-        .message-body {
-            max-width: 300px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: #475569;
-        }
-        .sender-info strong {
-            color: #0f172a;
-            font-size: 1rem;
-        }
-        .sender-info span {
-            color: #64748b;
-            font-size: 0.85rem;
-        }
-    </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        
-        <!-- Dashboard Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">Admin Panel</div>
-            <ul class="sidebar-nav">
-                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-house"></i> Manage Rooms</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> Manage Users</a></li>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-top">
+            <div class="logo-section">
+                <div class="logo">KHOJ</div>
+                <div class="logo-subtitle">Admin Control</div>
+            </div>
+            <hr class="sidebar-divider">
+            <div class="superuser-badge">
+                <div class="superuser-avatar">A</div>
+                <div class="superuser-info">
+                    <span class="superuser-name">System Admin</span>
+                    <span class="superuser-role">SUPERUSER</span>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/messages" class="active"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
             </ul>
-        </aside>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="${pageContext.request.contextPath}/LogoutServlet"><i class="fa-solid fa-power-off"></i> Shutdown Session</a>
+        </div>
+    </div>
 
-        <!-- Main Content Area -->
         <main class="main-content">
-            <div class="header-area">
-                <h1>Message Center</h1>
+            <div class="header">
+                <div class="header-left">
+                    <div class="header-eyebrow">Communication Intelligence</div>
+                    <h1>Message Center</h1>
+                </div>
+                <div class="header-badge">
+                    <i class="fa-solid fa-envelope"></i> ${messages.size()} INQUIRIES
+                </div>
             </div>
 
             <c:if test="${param.msg == 'status_updated'}">
@@ -143,8 +82,16 @@
                                     <strong>${msg.fullName}</strong><br>
                                     <span>${msg.email}</span>
                                 </td>
-                                <td style="font-weight: 600;">${msg.subject}</td>
-                                <td class="message-body" title="${msg.messageBody}">${msg.messageBody}</td>
+                                <td style="font-weight: 600;">
+                                    <a href="${pageContext.request.contextPath}/admin/message-detail?id=${msg.id}" style="text-decoration: none; color: inherit; border-bottom: 1px dashed #cbd5e1;">
+                                        ${msg.subject}
+                                    </a>
+                                </td>
+                                <td class="message-body" title="${msg.messageBody}">
+                                    <a href="${pageContext.request.contextPath}/admin/message-detail?id=${msg.id}" style="text-decoration: none; color: inherit;">
+                                        ${msg.messageBody}
+                                    </a>
+                                </td>
                                 <td>
                                     <span class="status-${msg.status.toLowerCase()}">${msg.status}</span>
                                 </td>

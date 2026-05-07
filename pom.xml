@@ -67,6 +67,20 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- HikariCP: High-performance Database Connection Pool -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>6.2.1</version>
+        </dependency>
+
+        <!-- SLF4J: Required by HikariCP for internal logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.16</version>
+        </dependency>
     </dependencies>
 
     <build>

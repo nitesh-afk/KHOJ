@@ -42,7 +42,7 @@ public class PropertyDAO {
                     return property;
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
@@ -67,7 +67,7 @@ public class PropertyDAO {
                     amenities.add(rs.getString("amenity_name"));
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return amenities;
@@ -89,7 +89,7 @@ public class PropertyDAO {
                     images.add(rs.getString("image_url"));
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return images;
@@ -125,7 +125,7 @@ public class PropertyDAO {
                     properties.add(p);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
@@ -203,7 +203,7 @@ public class PropertyDAO {
                     properties.add(p);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
@@ -235,7 +235,7 @@ public class PropertyDAO {
                     properties.add(p);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
@@ -309,11 +309,6 @@ public class PropertyDAO {
 
         } catch (SQLException e) {
             String msg = "SQL error inserting property: [" + e.getErrorCode() + "] " + e.getMessage();
-            System.err.println("ERROR PropertyDAO.addProperty => " + msg);
-            e.printStackTrace();
-            throw new RuntimeException(msg, e);
-        } catch (ClassNotFoundException e) {
-            String msg = "DB driver not found: " + e.getMessage();
             System.err.println("ERROR PropertyDAO.addProperty => " + msg);
             e.printStackTrace();
             throw new RuntimeException(msg, e);

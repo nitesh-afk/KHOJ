@@ -1,6 +1,5 @@
 package com.khoj.controller;
 
-import com.khoj.model.User;
 import com.khoj.service.AdminService;
 import com.khoj.service.PropertyService;
 import com.khoj.service.UserService;
@@ -9,11 +8,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet({"/AdminServlet", "/admin/rooms", "/admin/users"})
+@WebServlet({"/AdminServlet", "/admin/rooms", "/admin/users", "/admin/messages", "/admin/message-detail"})
 public class AdminServlet extends HttpServlet {
     private final AdminService adminService = new AdminService();
     private final UserService userService = new UserService();
@@ -23,11 +21,6 @@ public class AdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        if (!checkAdmin(request)) {
-            response.sendRedirect(request.getContextPath() + "/views/auth/403-access-denied.jsp");
-            return;
-        }
-
         String path = request.getServletPath();
 
         if ("/admin/rooms".equals(path)) {
@@ -49,6 +42,21 @@ public class AdminServlet extends HttpServlet {
             return;
         }
 
+        if ("/admin/message-detail".equals(path)) {
+            int messageId = Integer.parseInt(request.getParameter("id"));
+            com.khoj.dao.AdminDAO adminDAO = new com.khoj.dao.AdminDAO();
+            
+            // 1. Mark as READ automatically if it's currently NEW
+            adminDAO.markAsReadIfNew(messageId);
+            
+            // 2. Fetch the full message object
+            com.khoj.model.Message message = adminDAO.getMessageById(messageId);
+            request.setAttribute("message", message);
+            
+            request.getRequestDispatcher("/views/admin/message-detail.jsp").forward(request, response);
+            return;
+        }
+
         // Fetch Global Stats for Dashboard
         Map<String, Integer> summary = adminService.getSystemSummary();
         request.setAttribute("stats", summary);
@@ -64,11 +72,6 @@ public class AdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
-        if (!checkAdmin(request)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-
         String action = request.getParameter("action");
         if (action == null) return;
 
@@ -101,9 +104,4 @@ public class AdminServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/AdminServlet");
     }
 
-    private boolean checkAdmin(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        User user = (session != null) ? (User) session.getAttribute("user") : null;
-        return user != null && "ADMIN".equalsIgnoreCase(user.getRole());
-    }
 }

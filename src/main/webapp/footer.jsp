@@ -7,6 +7,12 @@
         font-family: 'Inter', sans-serif;
     }
 
+    .mega-footer .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
     .footer-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -75,6 +81,7 @@
             <div class="footer-col">
                 <h4>Support</h4>
                 <ul>
+                    <li><a href="${pageContext.request.contextPath}/contact">Contact Us</a></li>
                     <li><a href="#">Help Centre</a></li>
                     <li><a href="#">Safety Information</a></li>
                     <li><a href="#">Cancellation Options</a></li>

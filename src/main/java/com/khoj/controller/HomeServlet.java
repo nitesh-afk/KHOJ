@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet("/home")
+@WebServlet({"/home", ""})
 public class HomeServlet extends HttpServlet {
     private final PropertyService propertyService = new PropertyService();
 
@@ -39,6 +39,6 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("propertyTypes", propertyService.getAllPropertyTypes());
 
         // 3. Forward to the refactored landing page
-        request.getRequestDispatcher("index.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/home.jsp").forward(request, response);
     }
 }

@@ -59,7 +59,7 @@ public class AdminDAO {
      */
     public java.util.List<com.khoj.model.Message> getAllMessages() {
         java.util.List<com.khoj.model.Message> messages = new java.util.ArrayList<>();
-        String query = "SELECT * FROM contact_messages ORDER BY id DESC";
+        String query = "SELECT * FROM contact_messages ORDER BY message_id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query);
              ResultSet rs = pst.executeQuery()) {
@@ -95,6 +95,47 @@ public class AdminDAO {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Admin: Fetches a single message by ID.
+     */
+    public com.khoj.model.Message getMessageById(int messageId) {
+        String query = "SELECT * FROM contact_messages WHERE message_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, messageId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    com.khoj.model.Message msg = new com.khoj.model.Message();
+                    msg.setId(rs.getInt("message_id"));
+                    msg.setFullName(rs.getString("full_name"));
+                    msg.setEmail(rs.getString("email"));
+                    msg.setSubject(rs.getString("subject"));
+                    msg.setMessageBody(rs.getString("message"));
+                    msg.setStatus(rs.getString("status"));
+                    msg.setCreatedAt(rs.getString("created_at"));
+                    return msg;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Admin: Marks a message as READ only if it is currently NEW.
+     */
+    public void markAsReadIfNew(int messageId) {
+        String query = "UPDATE contact_messages SET status = 'READ' WHERE message_id = ? AND status = 'NEW'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, messageId);
+            pst.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

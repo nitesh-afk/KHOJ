@@ -48,7 +48,7 @@
             /* Fluid typography using clamp() */
             font-size: clamp(2.5rem, 6vw, 4rem);
             font-weight: 700;
-            color: var(--primary-blue, var(--contact-blue));
+            color: var(--hero-overlay, #1C1917);
             margin-bottom: 2rem;
         }
 
@@ -110,7 +110,7 @@
         }
 
         .info-item i {
-            color: var(--primary-blue, var(--contact-blue));
+            color: var(--accent-gold, #C9A96E);
             font-size: 1.6rem;
             width: 35px;
             text-align: center;
@@ -149,12 +149,12 @@
             box-sizing: border-box;
         }
 
-        /* Glowing Blue Border on Focus */
+        /* Glowing Gold Border on Focus */
         .form-group input:focus, 
         .form-group textarea:focus {
             outline: none;
-            border-color: var(--primary-blue, var(--contact-blue));
-            box-shadow: 0 0 0 4px rgba(0, 53, 128, 0.12);
+            border-color: var(--accent-gold, #C9A96E);
+            box-shadow: 0 0 0 4px rgba(201, 169, 110, 0.2);
             background: #ffffff;
         }
 
@@ -164,8 +164,8 @@
         }
 
         .btn-submit {
-            background-color: var(--primary-blue, var(--contact-blue));
-            color: white;
+            background-color: var(--accent-gold, #C9A96E);
+            color: #1C1917;
             border: none;
             border-radius: 12px;
             padding: 16px 24px;
@@ -178,9 +178,9 @@
         }
 
         .btn-submit:hover {
-            background-color: #002255;
+            background-color: #b5955c;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 53, 128, 0.3);
+            box-shadow: 0 8px 20px rgba(201, 169, 110, 0.4);
         }
 
         /* Alert Styling */
@@ -203,8 +203,12 @@
 </head>
 <body>
 
-    <!-- Strict Requirement: Use existing header.jsp -->
-    <jsp:include page="../header.jsp" />
+    <!-- Inline Header since header.jsp does not exist -->
+    <header style="background: var(--hero-overlay, #1C1917); padding: 20px 0; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div class="contact-wrapper" style="max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; color: var(--accent-gold, #C9A96E); font-weight: 700; cursor: pointer; font-family: 'Playfair Display', serif; font-size: 2.2rem; letter-spacing: 1px;" onclick="window.location.href='${pageContext.request.contextPath}/home'">KHOJ</h2>
+        </div>
+    </header>
 
     <div class="contact-page">
         <div class="contact-wrapper">
