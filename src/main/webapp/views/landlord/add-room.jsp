@@ -396,7 +396,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="typeId">Property Type</label>
+                        <label for="propertyType">Property Type</label>
                         <select id="typeId" name="typeId" required>
                             <option value="">Select type...</option>
                             <c:forEach var="type" items="${propertyTypes}">

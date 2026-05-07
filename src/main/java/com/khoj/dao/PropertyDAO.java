@@ -95,45 +95,6 @@ public class PropertyDAO {
         return images;
     }
 
-    /**
-     * Query 4: Fetches properties categorized by theme name.
-     */
-    public List<Property> getPropertiesByTheme(String themeName) {
-        List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
-                +
-                "FROM properties p " +
-                "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
-                "JOIN cities c ON n.city_id = c.city_id " +
-                "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
-                "JOIN property_types pt ON p.type_id = pt.type_id " +
-                "JOIN users u ON p.landlord_id = u.user_id " +
-                "WHERE dt.theme_name = ? AND p.is_verified = TRUE";
-
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
-
-            pst.setString(1, themeName);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Property p = extractPropertyFromResultSet(rs);
-                    // For performance in list views, we often fetch amenities/images separately or
-                    // lazily,
-                    // but for this phase, we ensure the DTO is fully populated as per requirements.
-                    p.setAmenities(getAmenitiesForProperty(p.getPropertyId()));
-                    p.setImageUrls(getImagesForProperty(p.getPropertyId()));
-                    properties.add(p);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return properties;
-    }
-
-    /**
-     * Private helper to map a ResultSet row to a Property object.
-     */
     private Property extractPropertyFromResultSet(ResultSet rs) throws SQLException {
         Property property = new Property();
         property.setPropertyId(rs.getInt("property_id"));
@@ -158,294 +119,6 @@ public class PropertyDAO {
         return property;
     }
 
-    /**
-     * Advanced Search: Fetches properties based on location, type, and price model.
-     */
-    public List<Property> searchProperties(String location, String type, String priceModel) {
-        List<Property> properties = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
-                "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
-                        +
-                        "FROM properties p " +
-                        "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
-                        "JOIN cities c ON n.city_id = c.city_id " +
-                        "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
-                        "JOIN property_types pt ON p.type_id = pt.type_id " +
-                        "JOIN users u ON p.landlord_id = u.user_id " +
-                        "WHERE p.is_verified = TRUE ");
-
-        if (location != null && !location.isEmpty())
-            sql.append("AND (c.city_name LIKE ? OR n.neighborhood_name LIKE ?) ");
-        if (type != null && !type.isEmpty())
-            sql.append("AND pt.type_name = ? ");
-        if (priceModel != null && !priceModel.isEmpty())
-            sql.append("AND p.price_model = ? ");
-
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql.toString())) {
-
-            int paramIndex = 1;
-            if (location != null && !location.isEmpty()) {
-                String locPattern = "%" + location + "%";
-                pst.setString(paramIndex++, locPattern);
-                pst.setString(paramIndex++, locPattern);
-            }
-            if (type != null && !type.isEmpty())
-                pst.setString(paramIndex++, type);
-            if (priceModel != null && !priceModel.isEmpty())
-                pst.setString(paramIndex++, priceModel);
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Property p = extractPropertyFromResultSet(rs);
-                    p.setAmenities(getAmenitiesForProperty(p.getPropertyId()));
-                    p.setImageUrls(getImagesForProperty(p.getPropertyId()));
-                    properties.add(p);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return properties;
-    }
-
-    /**
-     * LANDLORD VIEW: Fetches all properties owned by a specific landlord.
-     */
-    public List<Property> getPropertiesByLandlord(int landlordId) {
-        List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
-                +
-                "FROM properties p " +
-                "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
-                "JOIN cities c ON n.city_id = c.city_id " +
-                "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
-                "JOIN property_types pt ON p.type_id = pt.type_id " +
-                "JOIN users u ON p.landlord_id = u.user_id " +
-                "WHERE p.landlord_id = ? " +
-                "ORDER BY p.property_id DESC";
-
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
-
-            pst.setInt(1, landlordId);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Property p = extractPropertyFromResultSet(rs);
-                    properties.add(p);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return properties;
-    }
-
-    /**
-     * Statistics: Counts properties for a landlord.
-     */
-    public int getPropertyCount(int landlordId) {
-        String sql = "SELECT COUNT(*) FROM properties WHERE landlord_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, landlordId);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next())
-                    return rs.getInt(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
-     * LANDLORD: Adds a new property and returns the generated property_id.
-     * Throws RuntimeException with the SQL error message on failure so callers can surface it.
-     */
-    public int addProperty(Property property) throws RuntimeException {
-        String sql = "INSERT INTO properties "
-                + "(landlord_id, neighborhood_id, type_id, title, description, price, price_model, furnishing_status, is_verified) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            // Resolve the exact ENUM values the DB actually uses
-            String resolvedPriceModel   = resolveEnumValue(conn, "properties", "price_model",       property.getPriceModel(),       "Monthly");
-            String resolvedFurnishing   = resolveEnumValue(conn, "properties", "furnishing_status",  property.getFurnishingStatus(), "Unfurnished");
-
-            System.out.println("DEBUG PropertyDAO.addProperty => landlordId=" + property.getLandlordId()
-                    + ", neighborhoodId=" + property.getNeighborhoodId()
-                    + ", typeId=" + property.getTypeId()
-                    + ", title='" + property.getTitle() + "'"
-                    + ", price=" + property.getPrice()
-                    + ", priceModel='" + resolvedPriceModel + "'"
-                    + ", furnishing='" + resolvedFurnishing + "'");
-
-            pst.setInt(1, property.getLandlordId());
-            pst.setInt(2, property.getNeighborhoodId());
-            pst.setInt(3, property.getTypeId());
-            pst.setString(4, property.getTitle() != null ? property.getTitle().trim() : "");
-            pst.setString(5, property.getDescription());
-            pst.setDouble(6, property.getPrice());
-            pst.setString(7, resolvedPriceModel);
-            pst.setString(8, resolvedFurnishing);
-            pst.setBoolean(9, false); // new listings start unverified
-
-            int rows = pst.executeUpdate();
-            System.out.println("DEBUG PropertyDAO.addProperty => rows affected: " + rows);
-
-            if (rows > 0) {
-                try (ResultSet rs = pst.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        int newId = rs.getInt(1);
-                        System.out.println("DEBUG PropertyDAO.addProperty => generated property_id=" + newId);
-                        return newId;
-                    }
-                }
-            }
-            return -1;
-
-        } catch (SQLException e) {
-            String msg = "SQL error inserting property: [" + e.getErrorCode() + "] " + e.getMessage();
-            System.err.println("ERROR PropertyDAO.addProperty => " + msg);
-            e.printStackTrace();
-            throw new RuntimeException(msg, e);
-        }
-    }
-
-    /**
-     * Reads the ENUM definition for a column from INFORMATION_SCHEMA and returns
-     * the allowed value that best matches the user-supplied input (case-insensitive,
-     * ignoring spaces/hyphens/underscores).  Falls back to {@code defaultValue} when
-     * no match is found.
-     *
-     * Example: DB has ENUM('fully_furnished','semi_furnished','unfurnished').
-     * Input "Fully Furnished" → stripped key "fullyfurnished" matches "fullyfurnished" → returns "fully_furnished".
-     */
-    private String resolveEnumValue(Connection conn, String table, String column,
-                                    String input, String defaultValue) {
-        // 1. Fetch the raw ENUM definition from information_schema
-        String infoSql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS "
-                + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?";
-        List<String> allowed = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(infoSql)) {
-            ps.setString(1, table);
-            ps.setString(2, column);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String colType = rs.getString(1); // e.g. "enum('Monthly','Daily')"
-                    System.out.println("DEBUG resolveEnumValue => " + column + " COLUMN_TYPE: " + colType);
-                    // Parse out the quoted values
-                    String inner = colType.replaceAll("(?i)^enum\\(", "").replaceAll("\\)$", "");
-                    for (String part : inner.split(",")) {
-                        allowed.add(part.trim().replaceAll("^'", "").replaceAll("'$", ""));
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("WARN resolveEnumValue => could not read INFORMATION_SCHEMA: " + e.getMessage());
-        }
-
-        if (allowed.isEmpty()) {
-            // Column might be VARCHAR, not ENUM — just return the input as-is
-            return input != null ? input : defaultValue;
-        }
-
-        System.out.println("DEBUG resolveEnumValue => " + column + " allowed values: " + allowed);
-
-        if (input == null || input.trim().isEmpty()) {
-            return defaultValue;
-        }
-
-        // 2. Strip spaces, hyphens, underscores to create a comparison key
-        String inputKey = input.trim().toLowerCase(Locale.ROOT)
-                .replaceAll("[\\s_\\-]+", "");
-
-        for (String candidate : allowed) {
-            String candidateKey = candidate.toLowerCase(Locale.ROOT)
-                    .replaceAll("[\\s_\\-]+", "");
-            if (inputKey.equals(candidateKey)) {
-                System.out.println("DEBUG resolveEnumValue => " + column + ": '" + input + "' -> '" + candidate + "'");
-                return candidate;
-            }
-        }
-
-        // 3. Partial match fallback (input starts-with or contains candidate key)
-        for (String candidate : allowed) {
-            String candidateKey = candidate.toLowerCase(Locale.ROOT)
-                    .replaceAll("[\\s_\\-]+", "");
-            if (inputKey.contains(candidateKey) || candidateKey.contains(inputKey)) {
-                System.out.println("DEBUG resolveEnumValue => " + column + " partial: '" + input + "' -> '" + candidate + "'");
-                return candidate;
-            }
-        }
-
-        // 4. Nothing matched — use first allowed value and log a warning
-        System.err.println("WARN resolveEnumValue => No match for '" + input
-                + "' in " + column + "=" + allowed + ". Using default: '" + defaultValue + "'");
-        return defaultValue;
-    }
-
-    public int getAnyNeighborhoodId() {
-        String sql = "SELECT neighborhood_id FROM neighborhoods ORDER BY neighborhood_id ASC LIMIT 1";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql);
-                ResultSet rs = pst.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("neighborhood_id");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public int getAnyPropertyTypeId() {
-        String sql = "SELECT type_id FROM property_types ORDER BY type_id ASC LIMIT 1";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql);
-                ResultSet rs = pst.executeQuery()) {
-            if (rs.next()) {
-                return rs.getInt("type_id");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return -1;
-    }
-
-    public boolean addPropertyImage(int propertyId, String imageUrl, boolean isPrimary) {
-        String sql = "INSERT INTO property_images (property_id, image_url, is_primary) VALUES (?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, propertyId);
-            pst.setString(2, imageUrl);
-            pst.setBoolean(3, isPrimary);
-            return pst.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean addPropertyAmenity(int propertyId, int amenityId) {
-        String sql = "INSERT INTO property_amenities (property_id, amenity_id) VALUES (?, ?)";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, propertyId);
-            pst.setInt(2, amenityId);
-            return pst.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * ADMIN: Fetches all properties in the system.
-     */
     public List<Property> getAllProperties() {
         List<Property> properties = new ArrayList<>();
         String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
@@ -471,86 +144,61 @@ public class PropertyDAO {
         return properties;
     }
 
-    /**
-     * Fetch all from destination_themes with hardcoded image mapping.
-     */
+    public List<PropertyType> getUniquePropertyTypes() {
+        return getAllPropertyTypes();
+    }
+
     public List<Theme> getAllThemes() {
         List<Theme> themes = new ArrayList<>();
         String sql = "SELECT * FROM destination_themes";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql);
-                ResultSet rs = pst.executeQuery()) {
-
+                Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                Theme theme = new Theme();
-                theme.setThemeId(rs.getInt("theme_id"));
-                theme.setName(rs.getString("theme_name"));
-                theme.setDescription(rs.getString("theme_description"));
-
-                // Hardcoded image mapping based on theme name for high-end UI vibes
-                String themeName = theme.getName().toLowerCase();
-                if (themeName.contains("city") || themeName.contains("urban"))
-                    theme.setImageUrl(
-                            "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80");
-                else if (themeName.contains("weekend") || themeName.contains("escape"))
-                    theme.setImageUrl(
-                            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80");
-                else if (themeName.contains("budget") || themeName.contains("student"))
-                    theme.setImageUrl(
-                            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=800&q=80");
-                else if (themeName.contains("luxury") || themeName.contains("premium"))
-                    theme.setImageUrl(
-                            "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80");
-                else if (themeName.contains("nature") || themeName.contains("hill"))
-                    theme.setImageUrl(
-                            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80");
-                else
-                    theme.setImageUrl(
-                            "https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c?auto=format&fit=crop&w=800&q=80");
-
-                themes.add(theme);
+                Theme t = new Theme();
+                t.setThemeId(rs.getInt("theme_id"));
+                t.setName(rs.getString("theme_name"));
+                t.setDescription(rs.getString("theme_description"));
+                
+                // Add default images based on theme name if needed
+                if ("Urban".equalsIgnoreCase(t.getName())) t.setImageUrl("https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=800&q=80");
+                else if ("Nature".equalsIgnoreCase(t.getName())) t.setImageUrl("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80");
+                else t.setImageUrl("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80");
+                
+                themes.add(t);
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return themes;
     }
 
-    /**
-     * Fetch properties where is_verified = TRUE.
-     */
     public List<Property> getVerifiedProperties(int limit) {
         List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
-                +
-                "FROM properties p " +
-                "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
-                "JOIN cities c ON n.city_id = c.city_id " +
-                "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
-                "JOIN property_types pt ON p.type_id = pt.type_id " +
-                "JOIN users u ON p.landlord_id = u.user_id " +
-                "WHERE p.is_verified = TRUE " +
-                "LIMIT ?";
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name " +
+                     "FROM properties p " +
+                     "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
+                     "JOIN cities c ON n.city_id = c.city_id " +
+                     "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
+                     "JOIN property_types pt ON p.type_id = pt.type_id " +
+                     "JOIN users u ON p.landlord_id = u.user_id " +
+                     "WHERE p.is_verified = TRUE " +
+                     "ORDER BY p.property_id DESC LIMIT ?";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, limit);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    Property p = extractPropertyFromResultSet(rs);
-                    p.setImageUrls(getImagesForProperty(p.getPropertyId())); // Fetch images for the card
-                    properties.add(p);
+                    properties.add(extractPropertyFromResultSet(rs));
                 }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
     }
 
-    /**
-     * Fetch all property types.
-     */
     public List<PropertyType> getAllPropertyTypes() {
         List<PropertyType> types = new ArrayList<>();
         String sql = "SELECT * FROM property_types";
@@ -565,260 +213,134 @@ public class PropertyDAO {
                 types.add(pt);
             }
 
-            // Auto-populate default property types if the table is completely empty
             if (types.isEmpty()) {
                 try (Statement s = conn.createStatement()) {
-                    s.executeUpdate(
-                            "INSERT INTO property_types (type_name) VALUES ('Apartment')");
-                    s.executeUpdate(
-                            "INSERT INTO property_types (type_name) VALUES ('Hostel')");
-                    s.executeUpdate(
-                            "INSERT INTO property_types (type_name) VALUES ('Hotel')");
-                    s.executeUpdate(
-                            "INSERT INTO property_types (type_name) VALUES ('Villa')");
+                    s.executeUpdate("INSERT INTO property_types (type_name) VALUES ('Apartment')");
+                    s.executeUpdate("INSERT INTO property_types (type_name) VALUES ('Hostel')");
+                    s.executeUpdate("INSERT INTO property_types (type_name) VALUES ('Hotel')");
+                    s.executeUpdate("INSERT INTO property_types (type_name) VALUES ('Villa')");
                 }
-                // Recursively fetch the newly inserted types
                 return getAllPropertyTypes();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         return types;
     }
 
-    /**
-     * Converts a free-text location name into a valid neighborhood_id foreign key.
-     * Searches for the name; if not found, creates a new neighborhood record on the
-     * fly.
-     */
-    public int getOrCreateNeighborhood(String neighborhoodName) {
-        if (neighborhoodName == null || neighborhoodName.trim().isEmpty())
-            return -1;
+    public int getOrCreatePropertyType(String typeName) {
+        if (typeName == null || typeName.trim().isEmpty()) return -1;
+        String normalized = typeName.trim();
+        
+        String selectSql = "SELECT type_id FROM property_types WHERE LOWER(type_name) = LOWER(?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(selectSql)) {
+            pst.setString(1, normalized);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getInt("type_id");
+            }
+            
+            String insertSql = "INSERT INTO property_types (type_name) VALUES (?)";
+            try (PreparedStatement ipst = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                ipst.setString(1, normalized);
+                ipst.executeUpdate();
+                try (ResultSet grs = ipst.getGeneratedKeys()) {
+                    if (grs.next()) return grs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 
+    public int getOrCreateNeighborhood(String neighborhoodName) {
+        if (neighborhoodName == null || neighborhoodName.trim().isEmpty()) return -1;
         String trimmedNeighborhood = neighborhoodName.trim();
         String query = "SELECT neighborhood_id FROM neighborhoods WHERE neighborhood_name = ?";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(query)) {
-
+             PreparedStatement pst = conn.prepareStatement(query)) {
             pst.setString(1, trimmedNeighborhood);
             try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1); // Found existing
+                if (rs.next()) return rs.getInt("neighborhood_id");
+            }
+            
+            int cityId = getAnyCityId();
+            String insert = "INSERT INTO neighborhoods (neighborhood_name, city_id) VALUES (?, ?)";
+            try (PreparedStatement ipst = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
+                ipst.setString(1, trimmedNeighborhood);
+                ipst.setInt(2, cityId);
+                ipst.executeUpdate();
+                try (ResultSet rs2 = ipst.getGeneratedKeys()) {
+                    if (rs2.next()) return rs2.getInt(1);
                 }
             }
-
-            // Not found: ensure at least one city exists before inserting neighborhood.
-            int cityId = -1;
-            try (Statement s = conn.createStatement()) {
-                ResultSet rsCity = s.executeQuery("SELECT city_id FROM cities LIMIT 1");
-                if (rsCity.next()) {
-                    cityId = rsCity.getInt(1);
-                } else {
-                    // No city exists: create one using an existing theme, or create a default theme first.
-                    int themeId = -1;
-                    try (ResultSet rsTheme = s.executeQuery("SELECT theme_id FROM destination_themes LIMIT 1")) {
-                        if (rsTheme.next()) {
-                            themeId = rsTheme.getInt(1);
-                        }
-                    }
-
-                    if (themeId <= 0) {
-                        String insertTheme = "INSERT INTO destination_themes (theme_name, theme_description) VALUES (?, ?)";
-                        try (PreparedStatement themePst = conn.prepareStatement(insertTheme, Statement.RETURN_GENERATED_KEYS)) {
-                            themePst.setString(1, "Default Theme");
-                            themePst.setString(2, "Auto-created theme");
-                            themePst.executeUpdate();
-                            try (ResultSet themeKeys = themePst.getGeneratedKeys()) {
-                                if (themeKeys.next()) {
-                                    themeId = themeKeys.getInt(1);
-                                }
-                            }
-                        }
-                    }
-
-                    if (themeId <= 0) {
-                        return -1;
-                    }
-
-                    String insertCity = "INSERT INTO cities (city_name, theme_id) VALUES (?, ?)";
-                    try (PreparedStatement cityPst = conn.prepareStatement(insertCity, Statement.RETURN_GENERATED_KEYS)) {
-                        cityPst.setString(1, "Default City");
-                        cityPst.setInt(2, themeId);
-                        cityPst.executeUpdate();
-                        try (ResultSet cityKeys = cityPst.getGeneratedKeys()) {
-                            if (cityKeys.next()) {
-                                cityId = cityKeys.getInt(1);
-                            }
-                        }
-                    }
-                }
-
-                if (cityId <= 0) {
-                    return -1;
-                }
-
-                String insert = "INSERT INTO neighborhoods (neighborhood_name, city_id) VALUES (?, ?)";
-                try (PreparedStatement insertPst = conn.prepareStatement(insert, Statement.RETURN_GENERATED_KEYS)) {
-                    insertPst.setString(1, trimmedNeighborhood);
-                    insertPst.setInt(2, cityId);
-                    insertPst.executeUpdate();
-
-                    try (ResultSet keys = insertPst.getGeneratedKeys()) {
-                        if (keys.next())
-                            return keys.getInt(1);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        } catch (Exception e) { e.printStackTrace(); }
         return -1;
     }
 
-    public int addPropertyWithTransaction(Property property, List<String> imageUrls, List<Integer> amenityIds) {
-        String insertProperty = "INSERT INTO properties (landlord_id, neighborhood_id, type_id, title, description, price, price_model, furnishing_status, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String insertImage = "INSERT INTO property_images (property_id, image_url, is_primary) VALUES (?, ?, ?)";
-        String insertAmenity = "INSERT INTO property_amenities (property_id, amenity_id) VALUES (?, ?)";
-
-        Connection conn = null;
-        int generatedPropertyId = -1;
-
-        try {
-            conn = DBConnection.getConnection();
-            conn.setAutoCommit(false); 
-
-            try (PreparedStatement pst = conn.prepareStatement(insertProperty, Statement.RETURN_GENERATED_KEYS)) {
-                String resolvedPriceModel = resolveEnumValue(conn, "properties", "price_model", property.getPriceModel(), "Monthly");
-                String resolvedFurnishing = resolveEnumValue(conn, "properties", "furnishing_status", property.getFurnishingStatus(), "Unfurnished");
-
-                pst.setInt(1, property.getLandlordId());
-                pst.setInt(2, property.getNeighborhoodId());
-                pst.setInt(3, property.getTypeId());
-                pst.setString(4, property.getTitle());
-                pst.setString(5, property.getDescription());
-                pst.setDouble(6, property.getPrice());
-                pst.setString(7, resolvedPriceModel);
-                pst.setString(8, resolvedFurnishing);
-                pst.setBoolean(9, false);
-                pst.executeUpdate();
-
-                try (ResultSet rs = pst.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        generatedPropertyId = rs.getInt(1);
-                    } else {
-                        throw new SQLException("Failed to retrieve generated Property ID.");
-                    }
-                }
-            }
-
-            if (imageUrls != null && !imageUrls.isEmpty()) {
-                try (PreparedStatement imgPst = conn.prepareStatement(insertImage)) {
-                    for (int i = 0; i < imageUrls.size(); i++) {
-                        imgPst.setInt(1, generatedPropertyId);
-                        imgPst.setString(2, imageUrls.get(i));
-                        imgPst.setBoolean(3, i == 0); 
-                        imgPst.addBatch();
-                    }
-                    imgPst.executeBatch();
-                }
-            }
-
-            if (amenityIds != null && !amenityIds.isEmpty()) {
-                try (PreparedStatement amnPst = conn.prepareStatement(insertAmenity)) {
-                    for (Integer amenityId : amenityIds) {
-                        amnPst.setInt(1, generatedPropertyId);
-                        amnPst.setInt(2, amenityId);
-                        amnPst.addBatch();
-                    }
-                    amnPst.executeBatch();
-                }
-            }
-
-            conn.commit(); 
-            return generatedPropertyId;
-
-        } catch (Exception e) {
-            if (conn != null) {
-                try {
-                    conn.rollback(); 
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true); 
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return -1;
+    private int getAnyCityId() {
+        try (Connection conn = DBConnection.getConnection(); Statement s = conn.createStatement();
+             ResultSet rs = s.executeQuery("SELECT city_id FROM cities LIMIT 1")) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) {}
+        return 1; 
     }
 
-    public boolean deleteProperty(int propertyId) {
-        String query = "DELETE FROM properties WHERE property_id = ?";
+    public int getAnyNeighborhoodId() {
+        try (Connection conn = DBConnection.getConnection(); Statement s = conn.createStatement();
+             ResultSet rs = s.executeQuery("SELECT neighborhood_id FROM neighborhoods LIMIT 1")) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) {}
+        return 1;
+    }
+
+    public int addProperty(Property p) {
+        String sql = "INSERT INTO properties (landlord_id, neighborhood_id, type_id, title, description, price, price_model, furnishing_status, is_verified) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(query)) {
+             PreparedStatement pst = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pst.setInt(1, p.getLandlordId());
+            pst.setInt(2, p.getNeighborhoodId());
+            pst.setInt(3, p.getTypeId());
+            pst.setString(4, p.getTitle());
+            pst.setString(5, p.getDescription());
+            pst.setDouble(6, p.getPrice());
+            pst.setString(7, p.getPriceModel());
+            pst.setString(8, p.getFurnishingStatus());
+            pst.setBoolean(9, p.isVerified());
+            pst.executeUpdate();
+            try (ResultSet rs = pst.getGeneratedKeys()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return -1;
+    }
+
+    public boolean addPropertyImage(int propertyId, String imageUrl, boolean isPrimary) {
+        String sql = "INSERT INTO property_images (property_id, image_url, is_primary) VALUES (?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, propertyId);
+            pst.setString(2, imageUrl);
+            pst.setBoolean(3, isPrimary);
             return pst.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
     }
 
-    public List<Property> searchProperties(Integer themeId, Integer neighborhoodId, Double maxPrice) {
-        List<Property> results = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
-            "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name " +
-            "FROM properties p " +
-            "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
-            "JOIN cities c ON n.city_id = c.city_id " +
-            "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
-            "JOIN property_types pt ON p.type_id = pt.type_id " +
-            "JOIN users u ON p.landlord_id = u.user_id " +
-            "WHERE p.is_verified = TRUE "
-        );
-        
-        List<Object> parameters = new ArrayList<>();
-
-        if (themeId != null) {
-            sql.append("AND c.theme_id = ? ");
-            parameters.add(themeId);
-        }
-        if (neighborhoodId != null) {
-            sql.append("AND p.neighborhood_id = ? ");
-            parameters.add(neighborhoodId);
-        }
-        if (maxPrice != null) {
-            sql.append("AND p.price <= ? ");
-            parameters.add(maxPrice);
-        }
-
+    public boolean addPropertyAmenity(int propertyId, int amenityId) {
+        String sql = "INSERT INTO property_amenities (property_id, amenity_id) VALUES (?, ?)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
-             
-            for (int i = 0; i < parameters.size(); i++) {
-                pst.setObject(i + 1, parameters.get(i));
-            }
-
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    Property p = extractPropertyFromResultSet(rs);
-                    p.setImageUrls(getImagesForProperty(p.getPropertyId()));
-                    results.add(p);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return results;
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, propertyId);
+            pst.setInt(2, amenityId);
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
     }
 
-    public List<Property> getPublicProperties() {
+    public List<Property> getPropertiesByTheme(String themeName) {
         List<Property> properties = new ArrayList<>();
         String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name " +
                      "FROM properties p " +
@@ -827,21 +349,104 @@ public class PropertyDAO {
                      "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
                      "JOIN property_types pt ON p.type_id = pt.type_id " +
                      "JOIN users u ON p.landlord_id = u.user_id " +
-                     "WHERE p.is_verified = TRUE " + 
-                     "ORDER BY p.created_at DESC LIMIT 50";
+                     "WHERE dt.theme_name = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, themeName);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    properties.add(extractPropertyFromResultSet(rs));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return properties;
+    }
+
+    public List<Property> searchProperties(String location, String type, String priceModel) {
+        List<Property> properties = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name ")
+                .append("FROM properties p ")
+                .append("JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id ")
+                .append("JOIN cities c ON n.city_id = c.city_id ")
+                .append("JOIN destination_themes dt ON c.theme_id = dt.theme_id ")
+                .append("JOIN property_types pt ON p.type_id = pt.type_id ")
+                .append("JOIN users u ON p.landlord_id = u.user_id WHERE 1=1 ");
+
+        if (location != null && !location.isEmpty()) sql.append("AND (n.neighborhood_name LIKE ? OR c.city_name LIKE ?) ");
+        if (type != null && !type.isEmpty()) sql.append("AND p.type_id = ? ");
+        if (priceModel != null && !priceModel.isEmpty()) sql.append("AND p.price_model = ? ");
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-
-            while (rs.next()) {
-                Property p = extractPropertyFromResultSet(rs);
-                p.setImageUrls(getImagesForProperty(p.getPropertyId()));
-                properties.add(p);
+             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
+            int paramIdx = 1;
+            if (location != null && !location.isEmpty()) {
+                pst.setString(paramIdx++, "%" + location + "%");
+                pst.setString(paramIdx++, "%" + location + "%");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            if (type != null && !type.isEmpty()) pst.setString(paramIdx++, type);
+            if (priceModel != null && !priceModel.isEmpty()) pst.setString(paramIdx++, priceModel);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    properties.add(extractPropertyFromResultSet(rs));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
         return properties;
+    }
+
+    public List<Property> getPropertiesByLandlord(int landlordId) {
+        List<Property> properties = new ArrayList<>();
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name " +
+                     "FROM properties p " +
+                     "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
+                     "JOIN cities c ON n.city_id = c.city_id " +
+                     "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
+                     "JOIN property_types pt ON p.type_id = pt.type_id " +
+                     "JOIN users u ON p.landlord_id = u.user_id WHERE p.landlord_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, landlordId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    properties.add(extractPropertyFromResultSet(rs));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return properties;
+    }
+
+    public int getPropertyCount(int landlordId) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement("SELECT COUNT(*) FROM properties WHERE landlord_id = ?")) {
+            pst.setInt(1, landlordId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public boolean deleteProperty(int propertyId) {
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement p1 = conn.prepareStatement("DELETE FROM property_images WHERE property_id = ?")) {
+                    p1.setInt(1, propertyId); p1.executeUpdate();
+                }
+                try (PreparedStatement p2 = conn.prepareStatement("DELETE FROM property_amenities WHERE property_id = ?")) {
+                    p2.setInt(1, propertyId); p2.executeUpdate();
+                }
+                try (PreparedStatement p3 = conn.prepareStatement("DELETE FROM properties WHERE property_id = ?")) {
+                    p3.setInt(1, propertyId);
+                    if (p3.executeUpdate() > 0) {
+                        conn.commit();
+                        return true;
+                    }
+                }
+                conn.rollback();
+            } catch (Exception e) { conn.rollback(); throw e; }
+        } catch (Exception e) { e.printStackTrace(); }
+        return false;
     }
 }

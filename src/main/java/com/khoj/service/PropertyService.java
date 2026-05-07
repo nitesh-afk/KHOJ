@@ -69,4 +69,8 @@ public class PropertyService {
     public List<PropertyType> getAllPropertyTypes() {
         return propertyDAO.getAllPropertyTypes();
     }
+
+    public List<PropertyType> getUniquePropertyTypes() {
+        return propertyDAO.getUniquePropertyTypes();
+    }
 }

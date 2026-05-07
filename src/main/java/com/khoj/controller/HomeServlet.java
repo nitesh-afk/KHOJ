@@ -36,7 +36,7 @@ public class HomeServlet extends HttpServlet {
         // 2. Fetch data for the horizontal swimlanes
         request.setAttribute("vibes", propertyService.getAllThemes());
         request.setAttribute("verifiedProperties", propertyService.getVerifiedProperties(8));
-        request.setAttribute("propertyTypes", propertyService.getAllPropertyTypes());
+        request.setAttribute("propertyTypes", propertyService.getUniquePropertyTypes());
         request.setAttribute("properties", propertyService.getAllProperties());
 
         // 3. Forward to the refactored landing page

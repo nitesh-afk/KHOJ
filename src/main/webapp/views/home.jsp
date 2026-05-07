@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -648,10 +649,9 @@
                     <label>Property Type</label>
                     <select name="type">
                         <option value="">All Types</option>
-                        <option value="Apartment">Apartment</option>
-                        <option value="Hostel">Hostel</option>
-                        <option value="Hotel">Hotel</option>
-                        <option value="Villa">Villa</option>
+                        <c:forEach var="type" items="${propertyTypes}">
+                            <option value="${type.typeId}">${type.name}</option>
+                        </c:forEach>
                     </select>
                 </div>
                 <div class="search-item">
