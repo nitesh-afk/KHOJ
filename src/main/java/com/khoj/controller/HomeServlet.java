@@ -17,12 +17,28 @@ public class HomeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Fetch data for the horizontal swimlanes
+        // 1. Intelligent Session Routing
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            com.khoj.model.User user = (com.khoj.model.User) session.getAttribute("user");
+            String role = user.getRole();
+            
+            if ("ADMIN".equalsIgnoreCase(role)) {
+                response.sendRedirect(request.getContextPath() + "/AdminServlet");
+                return;
+            } else if ("LANDLORD".equalsIgnoreCase(role)) {
+                response.sendRedirect(request.getContextPath() + "/LandlordDashboard");
+                return;
+            }
+            // TENANTs fall through to the public discovery feed below
+        }
+
+        // 2. Fetch data for the horizontal swimlanes
         request.setAttribute("vibes", propertyService.getAllThemes());
         request.setAttribute("verifiedProperties", propertyService.getVerifiedProperties(8));
         request.setAttribute("propertyTypes", propertyService.getAllPropertyTypes());
 
-        // Forward to the refactored landing page
+        // 3. Forward to the refactored landing page
         request.getRequestDispatcher("index.jsp").forward(request, response);
     }
 }

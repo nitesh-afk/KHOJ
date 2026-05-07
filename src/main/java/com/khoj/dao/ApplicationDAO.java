@@ -69,10 +69,16 @@ public class ApplicationDAO {
     }
 
     public boolean updateApplicationStatus(int appId, String status) {
+        String normalizedStatus = status != null ? status.trim().toUpperCase() : "";
+
+        if (!normalizedStatus.equals("PENDING") && !normalizedStatus.equals("ACCEPTED") && !normalizedStatus.equals("REJECTED")) {
+            throw new IllegalArgumentException("Invalid status. Must be strictly PENDING, ACCEPTED, or REJECTED.");
+        }
+        
         String query = "UPDATE applications SET status = ? WHERE app_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
-            pst.setString(1, status);
+            pst.setString(1, normalizedStatus);
             pst.setInt(2, appId);
             return pst.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }

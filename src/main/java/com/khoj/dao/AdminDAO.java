@@ -53,4 +53,48 @@ public class AdminDAO {
             return false;
         }
     }
+
+    /**
+     * Admin: Fetches all contact messages.
+     */
+    public java.util.List<com.khoj.model.Message> getAllMessages() {
+        java.util.List<com.khoj.model.Message> messages = new java.util.ArrayList<>();
+        String query = "SELECT * FROM contact_messages ORDER BY id DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+            
+            while (rs.next()) {
+                com.khoj.model.Message msg = new com.khoj.model.Message();
+                msg.setId(rs.getInt("message_id"));
+                msg.setFullName(rs.getString("full_name"));
+                msg.setEmail(rs.getString("email"));
+                msg.setSubject(rs.getString("subject"));
+                msg.setMessageBody(rs.getString("message"));
+                msg.setStatus(rs.getString("status"));
+                msg.setCreatedAt(rs.getString("created_at"));
+                messages.add(msg);
+            }
+        } catch (Exception e) {
+            System.err.println("ERROR AdminDAO: contact_messages table might not exist yet.");
+            e.printStackTrace();
+        }
+        return messages;
+    }
+
+    /**
+     * Admin: Update message status (e.g. ARCHIVED)
+     */
+    public boolean updateMessageStatus(int messageId, String status) {
+        String query = "UPDATE contact_messages SET status = ? WHERE message_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setString(1, status);
+            pst.setInt(2, messageId);
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

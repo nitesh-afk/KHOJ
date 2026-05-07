@@ -501,7 +501,17 @@
             <div class="nav-actions">
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
-                        <a href="my-bookings" class="nav-link">My Bookings</a>
+                        <c:choose>
+                            <c:when test="${sessionScope.user.role == 'ADMIN'}">
+                                <a href="AdminServlet" class="nav-link">Admin Panel</a>
+                            </c:when>
+                            <c:when test="${sessionScope.user.role == 'LANDLORD'}">
+                                <a href="LandlordDashboard" class="nav-link">Landlord Panel</a>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="my-bookings" class="nav-link">My Bookings</a>
+                            </c:otherwise>
+                        </c:choose>
                         <div class="user-badge">
                             <i class="fa-solid fa-circle-user" style="color: var(--accent-gold); font-size: 1.2rem;"></i>
                             ${sessionScope.user.fullName}

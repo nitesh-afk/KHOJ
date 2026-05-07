@@ -29,7 +29,7 @@ body {
 }
 
 .hero h1 {
-    font-size: 3rem;
+    font-size: clamp(2rem, 5vw, 4rem);
     margin-bottom: 10px;
     font-weight: 800;
 }

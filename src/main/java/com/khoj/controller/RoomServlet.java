@@ -58,6 +58,42 @@ public class RoomServlet extends HttpServlet {
             return;
         }
 
+        String action = request.getParameter("action");
+        if ("delete".equals(action)) {
+            try {
+                int propertyId = Integer.parseInt(request.getParameter("propertyId"));
+                com.khoj.dao.PropertyDAO propertyDAO = new com.khoj.dao.PropertyDAO();
+                
+                // RBAC SECURITY FIX: Verify property ownership before deletion
+                Property targetProperty = propertyDAO.getPropertyById(propertyId);
+                if (targetProperty == null || targetProperty.getLandlordId() != user.getId()) {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+
+                List<String> imageUrls = propertyDAO.getImagesForProperty(propertyId);
+                boolean dbDeleted = propertyDAO.deleteProperty(propertyId);
+                
+                if (dbDeleted) {
+                    String uploadPath = getServletContext().getRealPath("") + java.io.File.separator + "uploads";
+                    for (String relativeUrl : imageUrls) {
+                        String fileName = new java.io.File(relativeUrl).getName(); 
+                        java.io.File physicalFile = new java.io.File(uploadPath + java.io.File.separator + fileName);
+                        if (physicalFile.exists()) {
+                            physicalFile.delete();
+                        }
+                    }
+                    response.sendRedirect(request.getContextPath() + "/LandlordDashboard?success=deleted");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/LandlordDashboard?error=deletion_failed");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.sendRedirect(request.getContextPath() + "/LandlordDashboard?error=server_error");
+            }
+            return;
+        }
+
         try {
             String neighborhoodName = request.getParameter("neighborhoodName");
             String typeIdStr        = request.getParameter("typeId");
@@ -86,7 +122,8 @@ public class RoomServlet extends HttpServlet {
 
             String priceModel       = request.getParameter("priceModel");
             String furnishingStatus = request.getParameter("furnishingStatus");
-            String description      = request.getParameter("description");
+            String rawDescription   = request.getParameter("description");
+            String description      = com.khoj.util.SecurityUtil.sanitizeHTML(rawDescription);
             String imageUrl         = request.getParameter("imageUrl");
 
             // --- Build and persist Property ---

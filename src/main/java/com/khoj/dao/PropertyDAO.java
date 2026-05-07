@@ -681,4 +681,172 @@ public class PropertyDAO {
 
         return -1;
     }
+
+    public int addPropertyWithTransaction(Property property, List<String> imageUrls, List<Integer> amenityIds) {
+        String insertProperty = "INSERT INTO properties (landlord_id, neighborhood_id, type_id, title, description, price, price_model, furnishing_status, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertImage = "INSERT INTO property_images (property_id, image_url, is_primary) VALUES (?, ?, ?)";
+        String insertAmenity = "INSERT INTO property_amenities (property_id, amenity_id) VALUES (?, ?)";
+
+        Connection conn = null;
+        int generatedPropertyId = -1;
+
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false); 
+
+            try (PreparedStatement pst = conn.prepareStatement(insertProperty, Statement.RETURN_GENERATED_KEYS)) {
+                String resolvedPriceModel = resolveEnumValue(conn, "properties", "price_model", property.getPriceModel(), "Monthly");
+                String resolvedFurnishing = resolveEnumValue(conn, "properties", "furnishing_status", property.getFurnishingStatus(), "Unfurnished");
+
+                pst.setInt(1, property.getLandlordId());
+                pst.setInt(2, property.getNeighborhoodId());
+                pst.setInt(3, property.getTypeId());
+                pst.setString(4, property.getTitle());
+                pst.setString(5, property.getDescription());
+                pst.setDouble(6, property.getPrice());
+                pst.setString(7, resolvedPriceModel);
+                pst.setString(8, resolvedFurnishing);
+                pst.setBoolean(9, false);
+                pst.executeUpdate();
+
+                try (ResultSet rs = pst.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        generatedPropertyId = rs.getInt(1);
+                    } else {
+                        throw new SQLException("Failed to retrieve generated Property ID.");
+                    }
+                }
+            }
+
+            if (imageUrls != null && !imageUrls.isEmpty()) {
+                try (PreparedStatement imgPst = conn.prepareStatement(insertImage)) {
+                    for (int i = 0; i < imageUrls.size(); i++) {
+                        imgPst.setInt(1, generatedPropertyId);
+                        imgPst.setString(2, imageUrls.get(i));
+                        imgPst.setBoolean(3, i == 0); 
+                        imgPst.addBatch();
+                    }
+                    imgPst.executeBatch();
+                }
+            }
+
+            if (amenityIds != null && !amenityIds.isEmpty()) {
+                try (PreparedStatement amnPst = conn.prepareStatement(insertAmenity)) {
+                    for (Integer amenityId : amenityIds) {
+                        amnPst.setInt(1, generatedPropertyId);
+                        amnPst.setInt(2, amenityId);
+                        amnPst.addBatch();
+                    }
+                    amnPst.executeBatch();
+                }
+            }
+
+            conn.commit(); 
+            return generatedPropertyId;
+
+        } catch (Exception e) {
+            if (conn != null) {
+                try {
+                    conn.rollback(); 
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); 
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return -1;
+    }
+
+    public boolean deleteProperty(int propertyId) {
+        String query = "DELETE FROM properties WHERE property_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, propertyId);
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    public List<Property> searchProperties(Integer themeId, Integer neighborhoodId, Double maxPrice) {
+        List<Property> results = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name " +
+            "FROM properties p " +
+            "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
+            "JOIN cities c ON n.city_id = c.city_id " +
+            "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
+            "JOIN property_types pt ON p.type_id = pt.type_id " +
+            "JOIN users u ON p.landlord_id = u.user_id " +
+            "WHERE p.is_verified = TRUE "
+        );
+        
+        List<Object> parameters = new ArrayList<>();
+
+        if (themeId != null) {
+            sql.append("AND c.theme_id = ? ");
+            parameters.add(themeId);
+        }
+        if (neighborhoodId != null) {
+            sql.append("AND p.neighborhood_id = ? ");
+            parameters.add(neighborhoodId);
+        }
+        if (maxPrice != null) {
+            sql.append("AND p.price <= ? ");
+            parameters.add(maxPrice);
+        }
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
+             
+            for (int i = 0; i < parameters.size(); i++) {
+                pst.setObject(i + 1, parameters.get(i));
+            }
+
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Property p = extractPropertyFromResultSet(rs);
+                    p.setImageUrls(getImagesForProperty(p.getPropertyId()));
+                    results.add(p);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+    public List<Property> getPublicProperties() {
+        List<Property> properties = new ArrayList<>();
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name " +
+                     "FROM properties p " +
+                     "JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
+                     "JOIN cities c ON n.city_id = c.city_id " +
+                     "JOIN destination_themes dt ON c.theme_id = dt.theme_id " +
+                     "JOIN property_types pt ON p.type_id = pt.type_id " +
+                     "JOIN users u ON p.landlord_id = u.user_id " +
+                     "WHERE p.is_verified = TRUE " + 
+                     "ORDER BY p.created_at DESC LIMIT 50";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                Property p = extractPropertyFromResultSet(rs);
+                p.setImageUrls(getImagesForProperty(p.getPropertyId()));
+                properties.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return properties;
+    }
 }

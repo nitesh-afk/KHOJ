@@ -8,11 +8,21 @@ public class DBConnection {
     private static final String URL = "jdbc:mysql://localhost:3307/khoj_db";
     private static final String USER = "root";
     private static final String PASSWORD = "1234";
+    
+    // Static singleton connection instance
+    private static Connection connection = null;
 
-    public static Connection getConnection() throws SQLException, ClassNotFoundException {
-        // Load MySQL Driver explicitly
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+    /**
+     * Thread-Safe Singleton Connection Provider
+     */
+    public static synchronized Connection getConnection() throws SQLException, ClassNotFoundException {
+        // If connection is null or has been closed by the server, instantiate a new one
+        if (connection == null || connection.isClosed()) {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("DEBUG [DBConnection]: New Physical DB Connection Established.");
+        }
+        return connection;
     }
 
     /**

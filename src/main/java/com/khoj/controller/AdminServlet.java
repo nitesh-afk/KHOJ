@@ -42,6 +42,13 @@ public class AdminServlet extends HttpServlet {
             return;
         }
 
+        if ("/admin/messages".equals(path)) {
+            com.khoj.dao.AdminDAO adminDAO = new com.khoj.dao.AdminDAO();
+            request.setAttribute("messages", adminDAO.getAllMessages());
+            request.getRequestDispatcher("/views/admin/messages.jsp").forward(request, response);
+            return;
+        }
+
         // Fetch Global Stats for Dashboard
         Map<String, Integer> summary = adminService.getSystemSummary();
         request.setAttribute("stats", summary);
@@ -81,6 +88,14 @@ public class AdminServlet extends HttpServlet {
                 int uId = Integer.parseInt(request.getParameter("userId"));
                 userService.updateUserStatus(uId, "DEACTIVATED");
                 break;
+                
+            case "updateMessageStatus":
+                int messageId = Integer.parseInt(request.getParameter("messageId"));
+                String status = request.getParameter("status");
+                com.khoj.dao.AdminDAO adminDAO = new com.khoj.dao.AdminDAO();
+                adminDAO.updateMessageStatus(messageId, status);
+                response.sendRedirect(request.getContextPath() + "/admin/messages?msg=status_updated");
+                return;
         }
 
         response.sendRedirect(request.getContextPath() + "/AdminServlet");
