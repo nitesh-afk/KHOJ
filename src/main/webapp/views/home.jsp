@@ -490,6 +490,112 @@
             margin: 0;
         }
 
+        /* Property Grid & Vibe Cards */
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 20px 0;
+        }
+
+        .vibe-property-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .vibe-property-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px -12px rgba(201, 169, 110, 0.2);
+            border-color: var(--accent-gold);
+        }
+
+        .vibe-property-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+        }
+
+        .vibe-property-card .card-body {
+            padding: 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vibe-property-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .vibe-property-card .location {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vibe-property-card .price {
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-top: auto;
+            font-size: 1.15rem;
+            letter-spacing: -0.5px;
+        }
+
+        .vibe-property-card .btn-details {
+            margin-top: 20px;
+            background: var(--hero-overlay);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .vibe-property-card .btn-details:hover {
+            background: var(--accent-gold);
+            color: var(--text-primary);
+            transform: scale(1.02);
+        }
+
+        .verified-badge-small {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-gold);
+            color: var(--text-primary);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
     </style>
 </head>
 <body>
@@ -565,17 +671,37 @@
         <div class="container">
             <div class="section-header">
                 <h2>Discover Your Vibe</h2>
-                <p class="section-subtitle">Explore Nepal by mood</p>
+                <p class="section-subtitle">Explore real listings across Nepal</p>
             </div>
-            <div class="swimlane-container">
-                <c:forEach items="${vibes}" var="vibe">
-                    <div class="vibe-card" onclick="window.location.href='search?theme=${vibe.name}'">
-                        <img src="${vibe.imageUrl}" alt="${vibe.name}">
-                        <div class="vibe-overlay"></div>
-                        <div class="vibe-name">${vibe.name}</div>
+            
+            <c:choose>
+                <c:when test="${not empty properties}">
+                    <div class="property-grid">
+                        <c:forEach items="${properties}" var="p">
+                            <div class="vibe-property-card">
+                                <div style="position: relative;">
+                                    <c:if test="${p.verified}">
+                                        <span class="verified-badge-small"><i class="fa-solid fa-shield-halved"></i> Verified</span>
+                                    </c:if>
+                                    <img src="${not empty p.imageUrls ? p.imageUrls[0] : 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'}" alt="${p.title}">
+                                </div>
+                                <div class="card-body">
+                                    <h3>${p.title}</h3>
+                                    <p class="location"><i class="fa-solid fa-location-dot"></i> ${p.neighborhoodName}, ${p.cityName}</p>
+                                    <p class="price">NPR ${p.price} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-secondary);">/ ${p.priceModel}</span></p>
+                                    <a href="${pageContext.request.contextPath}/property-detail?id=${p.propertyId}" class="btn-details">View Details</a>
+                                </div>
+                            </div>
+                        </c:forEach>
                     </div>
-                </c:forEach>
-            </div>
+                </c:when>
+                <c:otherwise>
+                    <div style="text-align: center; padding: 60px 0; opacity: 0.6;">
+                        <i class="fa-solid fa-house-chimney-crack" style="font-size: 3rem; margin-bottom: 20px; color: var(--accent-gold);"></i>
+                        <p style="font-size: 1.2rem; font-family: 'Playfair Display', serif;">No vibes found yet. Check back soon!</p>
+                    </div>
+                </c:otherwise>
+            </c:choose>
         </div>
     </section>
 

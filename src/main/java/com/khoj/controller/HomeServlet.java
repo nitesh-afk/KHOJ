@@ -37,6 +37,7 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("vibes", propertyService.getAllThemes());
         request.setAttribute("verifiedProperties", propertyService.getVerifiedProperties(8));
         request.setAttribute("propertyTypes", propertyService.getAllPropertyTypes());
+        request.setAttribute("properties", propertyService.getAllProperties());
 
         // 3. Forward to the refactored landing page
         request.getRequestDispatcher("/views/home.jsp").forward(request, response);
