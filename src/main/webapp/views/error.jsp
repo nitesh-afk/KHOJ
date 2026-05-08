@@ -12,7 +12,7 @@
         <h1 style="font-size: 4rem; color: #3b82f6; margin-bottom: 1rem;">Oops!</h1>
         <h2 style="margin-bottom: 1rem;">Something went wrong.</h2>
         <p style="color: #64748b; margin-bottom: 2rem;">We couldn't find the page you were looking for, or an internal error occurred.</p>
-        <a href="${pageContext.request.contextPath}/index.jsp" style="text-decoration: none; background: #2563eb; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600;">Back to KHOJ</a>
+        <a href="${pageContext.request.contextPath}/home" style="text-decoration: none; background: #2563eb; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600;">Back to KHOJ</a>
     </div>
 </body>
 </html>

@@ -604,30 +604,32 @@
     <!-- Header Area -->
     <header id="main-header">
         <div class="container header-content">
-            <a href="home" class="logo">KHOJ</a>
+            <a href="${pageContext.request.contextPath}/home" class="logo">KHOJ</a>
             <div class="nav-actions">
+                <a href="${pageContext.request.contextPath}/home" class="nav-link">Home</a>
+                <a href="${pageContext.request.contextPath}/about" class="nav-link">About Us</a>
+                <a href="${pageContext.request.contextPath}/contact" class="nav-link">Contact</a>
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
                         <c:choose>
                             <c:when test="${sessionScope.user.role == 'ADMIN'}">
-                                <a href="AdminServlet" class="nav-link">Admin Panel</a>
+                                <a href="${pageContext.request.contextPath}/AdminServlet" class="nav-link">Admin Panel</a>
                             </c:when>
                             <c:when test="${sessionScope.user.role == 'LANDLORD'}">
-                                <a href="LandlordDashboard" class="nav-link">Landlord Panel</a>
+                                <a href="${pageContext.request.contextPath}/LandlordDashboard" class="nav-link">Landlord Panel</a>
                             </c:when>
                             <c:otherwise>
-                                <a href="my-bookings" class="nav-link">My Bookings</a>
+                                <a href="${pageContext.request.contextPath}/search" class="nav-link">Dashboard</a>
                             </c:otherwise>
                         </c:choose>
                         <div class="user-badge">
                             <i class="fa-solid fa-circle-user" style="color: var(--accent-gold); font-size: 1.2rem;"></i>
                             ${sessionScope.user.fullName}
                         </div>
-                        <a href="LogoutServlet" class="nav-link" style="color: rgba(255,255,255,0.7);">Logout</a>
+                        <a href="${pageContext.request.contextPath}/LogoutServlet" class="nav-link" style="color: rgba(255,255,255,0.7);">Logout</a>
                     </c:when>
                     <c:otherwise>
-                        <a href="#" class="nav-link">List your property</a>
-                        <a href="LoginServlet" class="btn-signin">Sign In</a>
+                        <a href="${pageContext.request.contextPath}/LoginServlet" class="btn-signin">Sign In</a>
                     </c:otherwise>
                 </c:choose>
             </div>

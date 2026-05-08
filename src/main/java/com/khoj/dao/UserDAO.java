@@ -19,7 +19,7 @@ public class UserDAO {
             pst.setString(1, email);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    return new User(
+                    User user = new User(
                         rs.getInt("user_id"),
                         rs.getString("full_name"),
                         rs.getString("email"),
@@ -27,6 +27,8 @@ public class UserDAO {
                         rs.getString("role_name"),
                         rs.getString("status")
                     );
+                    user.setCreatedAt(rs.getString("created_at"));
+                    return user;
                 }
             }
         } catch (Exception e) { e.printStackTrace(); }
@@ -173,6 +175,7 @@ public class UserDAO {
                     user.setPassword(rs.getString("password"));
                     user.setRole(rs.getString("role_name"));
                     user.setStatus(rs.getString("status"));
+                    user.setCreatedAt(rs.getString("created_at"));
                     return user;
                 }
             }

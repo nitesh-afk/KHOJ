@@ -62,6 +62,13 @@ public class DBFix {
                     s.executeUpdate("ALTER TABLE users ADD COLUMN approved_status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'APPROVED'");
                 }
 
+                // Check for created_at
+                try { s.executeQuery("SELECT created_at FROM users LIMIT 1"); }
+                catch (Exception e) {
+                    System.out.println("Adding created_at to users...");
+                    s.executeUpdate("ALTER TABLE users ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+                }
+
             } catch (Exception ex) {
                 System.err.println("Critical error aligning users table: " + ex.getMessage());
             }
