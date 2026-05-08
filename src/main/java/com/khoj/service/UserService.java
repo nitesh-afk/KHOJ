@@ -64,4 +64,16 @@ public class UserService { // Abhiyan
     public boolean updateUserStatus(int userId, String status) {
         return userDAO.updateUserStatus(userId, status);
     }
+
+    public boolean updateProfile(int userId, String fullName, String email, String phoneNumber) {
+        return userDAO.updateProfile(userId, fullName, email, phoneNumber);
+    }
+
+    public boolean updatePassword(int userId, String newHashedPassword) {
+        return userDAO.updatePassword(userId, newHashedPassword);
+    }
+
+    public User getUserById(int userId) {
+        return userDAO.getUserById(userId);
+    }
 }

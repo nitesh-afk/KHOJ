@@ -218,15 +218,28 @@
             padding: 6px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            gap: 6px;
+            flex-wrap: wrap;
         }
         .search-box input {
-            flex: 1;
+            flex: 1 1 220px;
             border: none;
             padding: 12px 20px;
             background: transparent;
             font-family: 'Inter', sans-serif;
             font-size: 0.95rem;
             color: #1C1917;
+            outline: none;
+        }
+        .search-box select {
+            flex: 1 1 160px;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: #1C1917;
+            background: #fff;
             outline: none;
         }
         .search-btn {
@@ -239,9 +252,79 @@
             font-family: 'Inter', sans-serif;
             cursor: pointer;
             transition: 0.2s;
+            min-height: 44px;
         }
         .search-btn:hover {
             background: #B8965B;
+        }
+
+        /* Filter Panel */
+        .filter-panel {
+            max-width: 900px;
+            margin: -20px auto 40px;
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            border: 1px solid #EDE9E3;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+        .filter-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #C9A96E;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-group select, .filter-group input {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #EDE9E3;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: #1C1917;
+            background: #FAF9F6;
+            outline: none;
+        }
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: #C9A96E;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-filter {
+            background: #1C1917;
+            color: #C9A96E;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+        .btn-filter:hover { background: #000; }
+        .btn-clear {
+            background: #FAF9F6;
+            color: #6B6560;
+            border: 1px solid #EDE9E3;
+            padding: 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-align: center;
         }
 
         /* Success Banner */
@@ -418,6 +501,8 @@
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/search" class="active"><i class="fa-solid fa-compass"></i> Property Discovery</a></li>
                 <li><a href="${pageContext.request.contextPath}/my-bookings"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
+                <li><a href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
+                <li><a href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
             </ul>
         </div>
         <div class="sidebar-bottom">
@@ -452,6 +537,55 @@
                 <button type="submit" class="search-btn">Discover</button>
             </form>
         </div>
+
+        <form action="${pageContext.request.contextPath}/search" method="get" class="filter-panel">
+            <input type="hidden" name="location" value="${searchLocation}">
+            
+            <div class="filter-group">
+                <label>Property Type</label>
+                <select name="type">
+                    <option value="">All Types</option>
+                    <option value="Apartment" ${searchType == 'Apartment' ? 'selected' : ''}>Apartment</option>
+                    <option value="Hostel" ${searchType == 'Hostel' ? 'selected' : ''}>Hostel</option>
+                    <option value="Hotel" ${searchType == 'Hotel' ? 'selected' : ''}>Hotel</option>
+                    <option value="Villa" ${searchType == 'Villa' ? 'selected' : ''}>Villa</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Price Range</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" name="minPrice" placeholder="Min" value="${param.minPrice}">
+                    <input type="number" name="maxPrice" placeholder="Max" value="${param.maxPrice}">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Furnishing</label>
+                <select name="furnishing">
+                    <option value="">Any</option>
+                    <option value="Unfurnished" ${param.furnishing == 'Unfurnished' ? 'selected' : ''}>Unfurnished</option>
+                    <option value="Semi-Furnished" ${param.furnishing == 'Semi-Furnished' ? 'selected' : ''}>Semi-Furnished</option>
+                    <option value="Fully Furnished" ${param.furnishing == 'Fully Furnished' ? 'selected' : ''}>Fully Furnished</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Bedrooms</label>
+                <select name="bedrooms">
+                    <option value="">Any</option>
+                    <option value="1" ${param.bedrooms == '1' ? 'selected' : ''}>1 Bedroom</option>
+                    <option value="2" ${param.bedrooms == '2' ? 'selected' : ''}>2 Bedrooms</option>
+                    <option value="3" ${param.bedrooms == '3' ? 'selected' : ''}>3 Bedrooms</option>
+                    <option value="4" ${param.bedrooms == '4' ? 'selected' : ''}>4+ Bedrooms</option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn-filter">Apply Filters</button>
+                <a href="${pageContext.request.contextPath}/search" class="btn-clear">Clear</a>
+            </div>
+        </form>
 
         <div class="results-header">
             <h3>

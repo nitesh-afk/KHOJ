@@ -115,6 +115,73 @@ public class UserDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    public boolean updateProfile(int userId, String fullName, String email, String phoneNumber) {
+        String duplicateCheckQuery = "SELECT 1 FROM users WHERE email = ? AND user_id <> ? LIMIT 1";
+        String updateQuery = "UPDATE users SET full_name = ?, email = ?, phone_number = ? WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection()) {
+            try (PreparedStatement duplicatePst = conn.prepareStatement(duplicateCheckQuery)) {
+                duplicatePst.setString(1, email);
+                duplicatePst.setInt(2, userId);
+                try (ResultSet rs = duplicatePst.executeQuery()) {
+                    if (rs.next()) {
+                        return false;
+                    }
+                }
+            }
+
+            try (PreparedStatement updatePst = conn.prepareStatement(updateQuery)) {
+                updatePst.setString(1, fullName);
+                updatePst.setString(2, email);
+                updatePst.setString(3, phoneNumber);
+                updatePst.setInt(4, userId);
+                return updatePst.executeUpdate() > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updatePassword(int userId, String newHashedPassword) {
+        String query = "UPDATE users SET password = ? WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setString(1, newHashedPassword);
+            pst.setInt(2, userId);
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public User getUserById(int userId) {
+        String query = "SELECT u.*, r.role_name FROM users u "
+                + "JOIN roles r ON u.role_id = r.role_id "
+                + "WHERE u.user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, userId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("user_id"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setEmail(rs.getString("email"));
+                    user.setPhoneNumber(rs.getString("phone_number"));
+                    user.setPassword(rs.getString("password"));
+                    user.setRole(rs.getString("role_name"));
+                    user.setStatus(rs.getString("status"));
+                    return user;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private int getRoleIdByName(String roleName) {
         if ("ADMIN".equalsIgnoreCase(roleName)) return 1;
         if ("LANDLORD".equalsIgnoreCase(roleName)) return 2;
