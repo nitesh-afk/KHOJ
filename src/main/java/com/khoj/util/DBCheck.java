@@ -52,6 +52,23 @@ public class DBCheck {
                 s.executeUpdate(
                         "CREATE TABLE destination_themes (theme_id INT AUTO_INCREMENT PRIMARY KEY, theme_name VARCHAR(100), theme_description VARCHAR(255))");
                 System.out.println("Created neighborhood tables.");
+                
+                // Insert default themes
+                s.executeUpdate("INSERT INTO destination_themes (theme_name, theme_description) VALUES ('Urban Luxury', 'Sleek city living')");
+                s.executeUpdate("INSERT INTO destination_themes (theme_name, theme_description) VALUES ('Nature Escape', 'Quiet and green')");
+                s.executeUpdate("INSERT INTO destination_themes (theme_name, theme_description) VALUES ('Student Budget', 'Affordable and close to campus')");
+                
+                // Insert default city
+                s.executeUpdate("INSERT INTO cities (city_name, theme_id) VALUES ('Kathmandu', 1)");
+                s.executeUpdate("INSERT INTO cities (city_name, theme_id) VALUES ('Pokhara', 2)");
+            }
+
+            System.out.println("Checking properties table for bedrooms column...");
+            try {
+                s.executeQuery("SELECT bedrooms FROM properties LIMIT 1");
+            } catch (Exception ex) {
+                System.out.println("Adding bedrooms column to properties...");
+                s.executeUpdate("ALTER TABLE properties ADD COLUMN bedrooms INT DEFAULT 0");
             }
         } catch (Exception e) {
             e.printStackTrace();

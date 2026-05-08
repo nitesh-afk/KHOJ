@@ -1,14 +1,14 @@
 package com.khoj.dao;
 
-import com.khoj.model.Wishlist;
-import com.khoj.util.DBConnection;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.khoj.model.Wishlist;
+import com.khoj.util.DBConnection;
 
 public class WishlistDAO {
 
@@ -28,7 +28,7 @@ public class WishlistDAO {
         } catch (java.sql.SQLIntegrityConstraintViolationException e) {
             // Already in wishlist, treat as success
             return true;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -43,7 +43,7 @@ public class WishlistDAO {
             pst.setInt(1, tenantId);
             pst.setInt(2, propertyId);
             return pst.executeUpdate() > 0;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -61,7 +61,7 @@ public class WishlistDAO {
             try (ResultSet rs = pst.executeQuery()) {
                 return rs.next();
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -91,7 +91,7 @@ public class WishlistDAO {
                     wishlistItems.add(wishlist);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 

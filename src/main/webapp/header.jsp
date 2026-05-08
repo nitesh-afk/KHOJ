@@ -9,11 +9,22 @@
             <a href="${pageContext.request.contextPath}/contact" class="nav-link">Contact</a>
             <c:choose>
                 <c:when test="${not empty sessionScope.user}">
-                    <a href="${pageContext.request.contextPath}/dashboard" class="nav-link btn-premium">Dashboard</a>
+                    <c:choose>
+                        <c:when test="${sessionScope.user.role == 'ADMIN'}">
+                            <a href="${pageContext.request.contextPath}/AdminServlet" class="nav-link btn-premium">Dashboard</a>
+                        </c:when>
+                        <c:when test="${sessionScope.user.role == 'LANDLORD'}">
+                            <a href="${pageContext.request.contextPath}/LandlordDashboard" class="nav-link btn-premium">Dashboard</a>
+                        </c:when>
+                        <c:otherwise>
+                            <a href="${pageContext.request.contextPath}/search" class="nav-link btn-premium">Dashboard</a>
+                        </c:otherwise>
+                    </c:choose>
+                    <a href="${pageContext.request.contextPath}/LogoutServlet" class="nav-link" style="opacity: 0.7;">Logout</a>
                 </c:when>
                 <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/auth/login" class="nav-link">Login</a>
-                    <a href="${pageContext.request.contextPath}/auth/register" class="nav-link btn-premium">Sign Up</a>
+                    <a href="${pageContext.request.contextPath}/LoginServlet" class="nav-link">Login</a>
+                    <a href="${pageContext.request.contextPath}/RegisterServlet" class="nav-link btn-premium">Sign Up</a>
                 </c:otherwise>
             </c:choose>
         </nav>

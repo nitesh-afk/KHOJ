@@ -1,10 +1,5 @@
 package com.khoj.dao;
 
-import com.khoj.model.Property;
-import com.khoj.model.PropertyType;
-import com.khoj.model.Theme;
-import com.khoj.util.DBConnection;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.khoj.model.Property;
+import com.khoj.model.PropertyType;
+import com.khoj.model.Theme;
+import com.khoj.util.DBConnection;
 
 public class PropertyDAO {
 
@@ -124,7 +124,7 @@ public class PropertyDAO {
                     properties.add(p);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
@@ -219,7 +219,7 @@ public class PropertyDAO {
                     properties.add(p);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
@@ -251,7 +251,7 @@ public class PropertyDAO {
                     properties.add(p);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return properties;
@@ -297,7 +297,7 @@ public class PropertyDAO {
             pst.setInt(7, propertyId);
             pst.setInt(8, landlordId);
             return pst.executeUpdate() > 0;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -310,7 +310,7 @@ public class PropertyDAO {
             pst.setInt(1, propertyId);
             pst.setInt(2, landlordId);
             return pst.executeUpdate() > 0;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -337,7 +337,7 @@ public class PropertyDAO {
                     counts.put("pending", rs.getInt("pending"));
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -383,10 +383,6 @@ public class PropertyDAO {
 
         } catch (SQLException e) {
             String msg = "SQL error inserting property: [" + e.getErrorCode() + "] " + e.getMessage();
-            e.printStackTrace();
-            throw new RuntimeException(msg, e);
-        } catch (ClassNotFoundException e) {
-            String msg = "DB driver not found: " + e.getMessage();
             e.printStackTrace();
             throw new RuntimeException(msg, e);
         }
@@ -516,6 +512,25 @@ public class PropertyDAO {
                 PreparedStatement pst = conn.prepareStatement(sql);
                 ResultSet rs = pst.executeQuery()) {
 
+            while (rs.next()) {
+                PropertyType pt = new PropertyType();
+                pt.setTypeId(rs.getInt("type_id"));
+                pt.setName(rs.getString("type_name"));
+                types.add(pt);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return types;
+    }
+
+    public List<PropertyType> getUniquePropertyTypes() {
+        List<PropertyType> types = new ArrayList<>();
+        String sql = "SELECT DISTINCT pt.type_id, pt.type_name "
+                + "FROM property_types pt "
+                + "JOIN properties p ON pt.type_id = p.type_id "
+                + "ORDER BY pt.type_name";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pst = conn.prepareStatement(sql);
+                ResultSet rs = pst.executeQuery()) {
             while (rs.next()) {
                 PropertyType pt = new PropertyType();
                 pt.setTypeId(rs.getInt("type_id"));

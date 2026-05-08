@@ -49,72 +49,8 @@
             padding: 80px 0;
         }
 
-        /* Header / Navbar */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            padding: 20px 0;
-            transition: var(--transition-premium);
-            background: transparent;
-        }
+        /* Header / Navbar styles removed - handled by header.jsp */
 
-        header.scrolled {
-            background: var(--hero-overlay);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--accent-gold);
-            cursor: pointer;
-            text-decoration: none;
-            letter-spacing: 1px;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .nav-link {
-            color: white;
-            text-decoration: none;
-            font-weight: 400;
-            font-size: 1rem;
-            transition: var(--transition-premium);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .nav-link:hover {
-            color: var(--accent-gold);
-        }
-
-        .btn-signin {
-            background: var(--accent-gold);
-            color: var(--text-primary);
-            padding: 10px 28px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: var(--transition-premium);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-signin:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(201, 169, 110, 0.4);
-        }
 
         .user-badge {
             color: white;
@@ -495,32 +431,7 @@
 <body>
 
     <!-- Header Area -->
-    <header id="main-header">
-        <div class="container header-content">
-            <a href="home" class="logo">KHOJ</a>
-            <div class="nav-actions">
-                <c:choose>
-                    <c:when test="${not empty sessionScope.user}">
-                        <c:if test="${sessionScope.user.role == 'ADMIN'}">
-                            <a href="AdminServlet" class="nav-link">Admin Dashboard</a>
-                        </c:if>
-                        <c:if test="${sessionScope.user.role != 'ADMIN'}">
-                            <a href="my-bookings" class="nav-link">My Bookings</a>
-                        </c:if>
-                        <div class="user-badge">
-                            <i class="fa-solid fa-circle-user" style="color: var(--accent-gold); font-size: 1.2rem;"></i>
-                            ${sessionScope.user.fullName}
-                        </div>
-                        <a href="LogoutServlet" class="nav-link" style="color: rgba(255,255,255,0.7);">Logout</a>
-                    </c:when>
-                    <c:otherwise>
-                        <a href="#" class="nav-link">List your property</a>
-                        <a href="LoginServlet" class="btn-signin">Sign In</a>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-    </header>
+    <%@ include file="header.jsp" %>
 
     <!-- Hero Section -->
     <section class="hero">

@@ -1,17 +1,19 @@
 package com.khoj.controller;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.khoj.service.AdminService;
 import com.khoj.service.PropertyService;
 import com.khoj.service.UserService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Map;
 
-@WebServlet({"/AdminServlet", "/admin/rooms", "/admin/users", "/admin/messages", "/admin/message-detail"})
+@WebServlet({"/AdminServlet", "/admin/rooms", "/admin/users", "/admin/messages", "/admin/message-detail", "/admin/analytics"})
 public class AdminServlet extends HttpServlet {
     private final AdminService adminService = new AdminService();
     private final UserService userService = new UserService();
@@ -45,15 +47,24 @@ public class AdminServlet extends HttpServlet {
         if ("/admin/message-detail".equals(path)) {
             int messageId = Integer.parseInt(request.getParameter("id"));
             com.khoj.dao.AdminDAO adminDAO = new com.khoj.dao.AdminDAO();
-            
+
             // 1. Mark as READ automatically if it's currently NEW
             adminDAO.markAsReadIfNew(messageId);
-            
+
             // 2. Fetch the full message object
             com.khoj.model.Message message = adminDAO.getMessageById(messageId);
             request.setAttribute("message", message);
-            
+
             request.getRequestDispatcher("/views/admin/message-detail.jsp").forward(request, response);
+            return;
+        }
+
+        if ("/admin/analytics".equals(path)) {
+            request.setAttribute("topProperties", adminService.getTopProperties(5));
+            request.setAttribute("statusBreakdown", adminService.getApplicationStatusBreakdown());
+            request.setAttribute("monthlyUsers", adminService.getMonthlyUserRegistrations());
+            request.setAttribute("pendingLandlords", adminService.getPendingLandlords());
+            request.getRequestDispatcher("/views/admin/analytics.jsp").forward(request, response);
             return;
         }
 
@@ -62,8 +73,9 @@ public class AdminServlet extends HttpServlet {
         request.setAttribute("stats", summary);
 
         // Fetch User and Property tables
-        request.setAttribute("users", userService.getAllUsers());
-        request.setAttribute("properties", propertyService.getAllProperties());
+        request.setAttribute("tenants", adminService.getTenants());
+        request.setAttribute("landlords", adminService.getLandlords());
+        request.setAttribute("rooms", propertyService.getAllProperties());
 
         request.getRequestDispatcher("/views/admin/dashboard.jsp").forward(request, response);
     }
@@ -76,20 +88,39 @@ public class AdminServlet extends HttpServlet {
         if (action == null) return;
 
         switch (action) {
-            case "deleteUser":
-                int userId = Integer.parseInt(request.getParameter("userId"));
-                userService.deleteUser(userId);
+            case "deactivateUser":
+                int deId = Integer.parseInt(request.getParameter("userId"));
+                String deRole = request.getParameter("userRole");
+                adminService.deactivateUser(deId, deRole);
                 break;
-            
+
+            case "reactivateUser":
+                int reId = Integer.parseInt(request.getParameter("userId"));
+                adminService.reactivateUser(reId);
+                break;
+
+            case "deleteUser":
+                int delId = Integer.parseInt(request.getParameter("userId"));
+                adminService.deleteUser(delId);
+                break;
+
             case "verifyProperty":
-                int propertyId = Integer.parseInt(request.getParameter("propertyId"));
-                boolean verify = Boolean.parseBoolean(request.getParameter("verify"));
+            case "approveRoom":
+                int propertyId = Integer.parseInt(request.getParameter("propertyId") != null ? 
+                                    request.getParameter("propertyId") : request.getParameter("roomId"));
+                boolean verify = Boolean.parseBoolean(request.getParameter("verify") != null ? 
+                                    request.getParameter("verify") : request.getParameter("approve"));
                 adminService.verifyProperty(propertyId, verify);
                 break;
                 
-            case "deactivateUser":
-                int uId = Integer.parseInt(request.getParameter("userId"));
-                userService.updateUserStatus(uId, "DEACTIVATED");
+            case "approveLandlord":
+                int approveId = Integer.parseInt(request.getParameter("userId"));
+                adminService.approveLandlord(approveId);
+                break;
+
+            case "rejectLandlord":
+                int rejectId = Integer.parseInt(request.getParameter("userId"));
+                adminService.rejectLandlord(rejectId);
                 break;
                 
             case "updateMessageStatus":

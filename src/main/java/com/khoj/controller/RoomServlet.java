@@ -1,17 +1,19 @@
 package com.khoj.controller;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.khoj.model.Property;
 import com.khoj.model.PropertyType;
 import com.khoj.model.User;
 import com.khoj.service.PropertyService;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
 
 @WebServlet({"/RoomServlet", "/my-rooms", "/add-room"})
 public class RoomServlet extends HttpServlet {
@@ -72,7 +74,7 @@ public class RoomServlet extends HttpServlet {
                 }
 
                 List<String> imageUrls = propertyDAO.getImagesForProperty(propertyId);
-                boolean dbDeleted = propertyDAO.deleteProperty(propertyId);
+                boolean dbDeleted = propertyDAO.deleteProperty(propertyId, user.getId());
                 
                 if (dbDeleted) {
                     String uploadPath = getServletContext().getRealPath("") + java.io.File.separator + "uploads";

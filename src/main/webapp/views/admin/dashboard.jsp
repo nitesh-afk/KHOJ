@@ -31,6 +31,7 @@
                 <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/messages"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/analytics"><i class="fa-solid fa-chart-bar"></i> Analytics</a></li>
                 <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
             </ul>
         </div>
@@ -92,20 +93,20 @@
                     <c:forEach var="room" items="${rooms}">
                         <tr>
                             <td class="cell-bold">${room.title}</td>
-                            <td>${room.location}</td>
+                            <td>${room.neighborhoodName}, ${room.cityName}</td>
                             <td>Rs. ${room.price}</td>
                             <td>
-                                <span class="badge ${room.approved ? 'badge-success' : 'badge-warning'}">
-                                    ${room.approved ? 'PUBLIC' : 'HELD'}
+                                <span class="badge ${room.verified ? 'badge-success' : 'badge-warning'}">
+                                    ${room.verified ? 'PUBLIC' : 'HELD'}
                                 </span>
                             </td>
                             <td>
                                 <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
                                     <input type="hidden" name="action" value="approveRoom">
-                                    <input type="hidden" name="roomId" value="${room.id}">
-                                    <input type="hidden" name="approve" value="${!room.approved}">
-                                    <button type="submit" class="btn ${room.approved ? 'btn-revoke' : 'btn-approve'}">
-                                        ${room.approved ? 'Revoke' : 'Approve'}
+                                    <input type="hidden" name="roomId" value="${room.propertyId}">
+                                    <input type="hidden" name="approve" value="${!room.verified}">
+                                    <button type="submit" class="btn ${room.verified ? 'btn-revoke' : 'btn-approve'}">
+                                        ${room.verified ? 'Revoke' : 'Approve'}
                                     </button>
                                 </form>
                             </td>
@@ -115,43 +116,62 @@
             </table>
         </div>
 
-        <!-- User Governance Section -->
+        <!-- Tenant Management Section -->
         <div class="section-wrapper">
             <div class="section-header">
-                <h2>User Governance</h2>
+                <h2>Tenant Management</h2>
+                <div class="live-pill">
+                    <div class="live-dot"></div> Live
+                </div>
             </div>
             <table>
                 <thead>
                     <tr>
                         <th>Identity</th>
-                        <th>Role</th>
-                        <th>State</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <c:forEach var="u" items="${users}">
+                    <c:forEach var="u" items="${tenants}">
                         <tr>
                             <td>
                                 <div class="cell-bold">${u.fullName}</div>
                                 <div class="cell-muted">${u.email}</div>
                             </td>
-                            <td><span class="badge badge-role">${u.role}</span></td>
                             <td>
-                                <span class="badge ${u.status == 'ACTIVE' ? 'badge-success' : 'badge-warning'}">
+                                <span class="badge ${u.status == 'ACTIVE' ? 'badge-success' : 'badge-danger'}">
                                     ${u.status}
                                 </span>
                             </td>
                             <td>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                    <input type="hidden" name="action" value="deactivateUser">
-                                    <input type="hidden" name="userId" value="${u.id}">
-                                    <button type="submit" class="btn btn-deactivate">Deactivate</button>
-                                </form>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                <c:choose>
+                                    <c:when test="${u.status == 'ACTIVE'}">
+                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="deactivateUser">
+                                            <input type="hidden" name="userId" value="${u.id}">
+                                            <input type="hidden" name="userRole" value="TENANT">
+                                            <button type="submit" class="btn btn-deactivate" onclick="return confirm('Are you sure you want to deactivate this tenant?')">
+                                                Deactivate
+                                            </button>
+                                        </form>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="reactivateUser">
+                                            <input type="hidden" name="userId" value="${u.id}">
+                                            <button type="submit" class="btn btn-approve">
+                                                Reactivate
+                                            </button>
+                                        </form>
+                                    </c:otherwise>
+                                </c:choose>
+                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline; margin-left: 8px;">
                                     <input type="hidden" name="action" value="deleteUser">
                                     <input type="hidden" name="userId" value="${u.id}">
-                                    <button type="submit" class="btn btn-delete" onclick="return confirm('Nuclear Option: Delete user?')">Delete</button>
+                                    <button type="submit" class="btn btn-delete" onclick="return confirm('CRITICAL: This will permanently delete the tenant. Continue?')">
+                                        Delete
+                                    </button>
                                 </form>
                             </td>
                         </tr>
@@ -159,6 +179,71 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Landlord Management Section -->
+        <div class="section-wrapper">
+            <div class="section-header">
+                <h2>Landlord Management</h2>
+                <div class="live-pill">
+                    <div class="live-dot"></div> Live
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Identity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="u" items="${landlords}">
+                        <tr>
+                            <td>
+                                <div class="cell-bold">${u.fullName}</div>
+                                <div class="cell-muted">${u.email}</div>
+                            </td>
+                            <td>
+                                <span class="badge ${u.status == 'ACTIVE' ? 'badge-success' : 'badge-danger'}">
+                                    ${u.status}
+                                </span>
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${u.status == 'ACTIVE'}">
+                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="deactivateUser">
+                                            <input type="hidden" name="userId" value="${u.id}">
+                                            <input type="hidden" name="userRole" value="LANDLORD">
+                                            <button type="submit" class="btn btn-deactivate" onclick="return confirm('WARNING: Deactivating this landlord will automatically UNPUBLISH all their active property listings. Continue?')">
+                                                Deactivate
+                                            </button>
+                                        </form>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                            <input type="hidden" name="action" value="reactivateUser">
+                                            <input type="hidden" name="userId" value="${u.id}">
+                                            <button type="submit" class="btn btn-approve">
+                                                Reactivate
+                                            </button>
+                                        </form>
+                                    </c:otherwise>
+                                </c:choose>
+                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline; margin-left: 8px;">
+                                    <input type="hidden" name="action" value="deleteUser">
+                                    <input type="hidden" name="userId" value="${u.id}">
+                                    <button type="submit" class="btn btn-delete" onclick="return confirm('CRITICAL: This will permanently delete the landlord and ALL their properties. Continue?')">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </body>
 </html>

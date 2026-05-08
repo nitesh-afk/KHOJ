@@ -1,14 +1,14 @@
 package com.khoj.dao;
 
-import com.khoj.model.Review;
-import com.khoj.util.DBConnection;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.khoj.model.Review;
+import com.khoj.util.DBConnection;
 
 public class ReviewDAO {
 
@@ -31,7 +31,8 @@ public class ReviewDAO {
             pst.setInt(3, rating);
             pst.setString(4, comment);
             return pst.executeUpdate() > 0;
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e)
+        {
             e.printStackTrace();
             return false;
         }
@@ -49,7 +50,7 @@ public class ReviewDAO {
             try (ResultSet rs = pst.executeQuery()) {
                 return rs.next();
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
@@ -81,7 +82,7 @@ public class ReviewDAO {
                     reviews.add(review);
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
@@ -100,7 +101,7 @@ public class ReviewDAO {
                     return rs.getDouble("average_rating");
                 }
             }
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
