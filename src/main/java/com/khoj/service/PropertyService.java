@@ -5,6 +5,7 @@ import com.khoj.model.Property;
 import com.khoj.model.PropertyType;
 import com.khoj.model.Theme;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service class for handling Property-related business logic.
@@ -20,8 +21,9 @@ public class PropertyService {
         return propertyDAO.getPropertiesByTheme(themeName);
     }
 
-    public List<Property> searchProperties(String location, String type, String priceModel) {
-        return propertyDAO.searchProperties(location, type, priceModel);
+    public List<Property> searchProperties(String location, String type, String priceModel,
+                                          Double minPrice, Double maxPrice, String furnishing, Integer bedrooms) {
+        return propertyDAO.searchProperties(location, type, priceModel, minPrice, maxPrice, furnishing, bedrooms);
     }
 
     public List<Property> getPropertiesByLandlord(int landlordId) {
@@ -30,6 +32,20 @@ public class PropertyService {
 
     public int getPropertyCount(int landlordId) {
         return propertyDAO.getPropertyCount(landlordId);
+    }
+
+    public boolean updateProperty(int propertyId, int landlordId, String title, String description,
+            double price, String priceModel, String furnishingStatus, int bedrooms) {
+        return propertyDAO.updateProperty(propertyId, landlordId, title, description, price, priceModel,
+                furnishingStatus, bedrooms);
+    }
+
+    public boolean deleteProperty(int propertyId, int landlordId) {
+        return propertyDAO.deleteProperty(propertyId, landlordId);
+    }
+
+    public Map<String, Integer> getPropertyCountByStatus(int landlordId) {
+        return propertyDAO.getPropertyCountByStatus(landlordId);
     }
 
     /**

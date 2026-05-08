@@ -125,6 +125,7 @@ public class RoomServlet extends HttpServlet {
             String rawDescription   = request.getParameter("description");
             String description      = com.khoj.util.SecurityUtil.sanitizeHTML(rawDescription);
             String imageUrl         = request.getParameter("imageUrl");
+            String bedroomsStr      = request.getParameter("bedrooms");
 
             // --- Build and persist Property ---
             Property property = new Property();
@@ -135,6 +136,10 @@ public class RoomServlet extends HttpServlet {
             property.setPrice(price);
             property.setPriceModel(priceModel);
             property.setFurnishingStatus(furnishingStatus);
+            
+            if (bedroomsStr != null && !bedroomsStr.trim().isEmpty()) {
+                property.setBedrooms(Integer.parseInt(bedroomsStr.trim()));
+            }
 
             // Use service to handle the complex add operation (including neighborhood resolution)
             int propertyId;

@@ -19,6 +19,7 @@ public class Property {
     private String priceModel; // ENUM: 'Monthly', 'Daily'
     private String furnishingStatus;
     private boolean isVerified;
+    private int bedrooms;
     private String createdAt;
 
     // Relational Strings (Fetched via SQL JOINs)
@@ -42,7 +43,7 @@ public class Property {
     public Property(int propertyId, int landlordId, String title, String description, 
                     double price, String priceModel, String furnishingStatus, boolean isVerified, 
                     String createdAt, String neighborhoodName, String cityName, String themeName, 
-                    String propertyType, String landlordName) {
+                    String propertyType, String landlordName, int bedrooms) {
         this.propertyId = propertyId;
         this.landlordId = landlordId;
         this.title = title;
@@ -57,6 +58,7 @@ public class Property {
         this.themeName = themeName;
         this.propertyType = propertyType;
         this.landlordName = landlordName;
+        this.bedrooms = bedrooms;
         this.amenities = new ArrayList<>();
         this.imageUrls = new ArrayList<>();
     }
@@ -95,6 +97,9 @@ public class Property {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public int getBedrooms() { return bedrooms; }
+    public void setBedrooms(int bedrooms) { this.bedrooms = bedrooms; }
 
     public String getNeighborhoodName() { return neighborhoodName; }
     public void setNeighborhoodName(String neighborhoodName) { this.neighborhoodName = neighborhoodName; }

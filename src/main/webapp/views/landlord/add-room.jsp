@@ -414,6 +414,11 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label for="bedrooms">Bedrooms</label>
+                        <input type="number" id="bedrooms" name="bedrooms" placeholder="1" min="0" required>
+                    </div>
+
                     <div class="form-group-full">
                         <label for="neighborhoodName">Location / Area</label>
                         <input type="text" id="neighborhoodName" name="neighborhoodName" placeholder="e.g. Thamel, Kathmandu" required>

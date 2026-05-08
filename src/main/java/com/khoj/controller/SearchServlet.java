@@ -22,18 +22,30 @@ public class SearchServlet extends HttpServlet {
         String type = request.getParameter("type");
         String priceModel = request.getParameter("priceModel");
         String theme = request.getParameter("theme");
+        
+        // Filter parameters
+        String minPriceStr = request.getParameter("minPrice");
+        String maxPriceStr = request.getParameter("maxPrice");
+        String furnishing = request.getParameter("furnishing");
+        String bedroomsStr = request.getParameter("bedrooms");
+
+        Double minPrice = (minPriceStr != null && !minPriceStr.isEmpty()) ? Double.parseDouble(minPriceStr) : null;
+        Double maxPrice = (maxPriceStr != null && !maxPriceStr.isEmpty()) ? Double.parseDouble(maxPriceStr) : null;
+        Integer bedrooms = (bedroomsStr != null && !bedroomsStr.isEmpty()) ? Integer.parseInt(bedroomsStr) : null;
 
         List<Property> properties;
         
         if (theme != null && !theme.isEmpty()) {
             properties = propertyService.getPropertiesByTheme(theme);
         } else {
-            // Advanced search using Service
-            properties = propertyService.searchProperties(location, type, priceModel);
+            properties = propertyService.searchProperties(location, type, priceModel, minPrice, maxPrice, furnishing, bedrooms);
         }
 
         request.setAttribute("properties", properties);
         request.setAttribute("searchLocation", location != null ? location : theme);
+        request.setAttribute("searchType", type);
+        request.setAttribute("searchPriceModel", priceModel);
+        request.setAttribute("searchTheme", theme);
         
         // Forward to search results page
         request.getRequestDispatcher("/views/tenant/dashboard.jsp").forward(request, response);
