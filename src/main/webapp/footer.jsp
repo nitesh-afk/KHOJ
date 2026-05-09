@@ -107,7 +107,7 @@
             <div class="footer-col">
                 <h4>About KHOJ</h4>
                 <ul>
-                    <li><a href="#">About Us</a></li>
+                    <li><a href="${pageContext.request.contextPath}/about">About Us</a></li>
                     <li><a href="#">Careers</a></li>
                     <li><a href="#">Privacy Policy</a></li>
                     <li><a href="#">Terms of Service</a></li>
