@@ -543,7 +543,7 @@
             </div>
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/search" class="active"><i class="fa-solid fa-compass"></i> Property Discovery</a></li>
-                <li><a href="${pageContext.request.contextPath}/my-bookings"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
+                <li><a href="${pageContext.request.contextPath}/ViewApplications"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
                 <li><a href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
                 <li><a href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
             </ul>

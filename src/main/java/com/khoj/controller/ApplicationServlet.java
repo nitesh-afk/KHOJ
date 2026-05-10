@@ -11,9 +11,27 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
-@WebServlet("/ApplyServlet")
+@WebServlet("/ViewApplications")
 public class ApplicationServlet extends HttpServlet {
     private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final com.khoj.dao.NotificationDAO notificationDAO = new com.khoj.dao.NotificationDAO();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+
+        if (user == null || !"TENANT".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/LoginServlet?error=Unauthorized");
+            return;
+        }
+
+        request.setAttribute("applications", applicationDAO.getApplicationsByTenant(user.getId()));
+        request.setAttribute("notifications", notificationDAO.getNotificationsByUser(user.getId()));
+        
+        request.getRequestDispatcher("/views/tenant/dashboard.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
