@@ -8,6 +8,7 @@ public class User {
     private String password;
     private String role; // ADMIN, LANDLORD, TENANT
     private String status; // ACTIVE, INACTIVE, PENDING
+    private String profileImg;
     private String createdAt;
 
     // Default Constructor
@@ -53,6 +54,9 @@ public class User {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getProfileImg() { return profileImg; }
+    public void setProfileImg(String profileImg) { this.profileImg = profileImg; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }

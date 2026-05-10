@@ -117,14 +117,14 @@ public class UserDAO {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    public boolean updateProfile(int userId, String fullName, String email, String phoneNumber) {
+    public boolean updateUserProfile(User user) {
         String duplicateCheckQuery = "SELECT 1 FROM users WHERE email = ? AND user_id <> ? LIMIT 1";
-        String updateQuery = "UPDATE users SET full_name = ?, email = ?, phone_number = ? WHERE user_id = ?";
+        String updateQuery = "UPDATE users SET full_name = ?, email = ?, phone_number = ?, profile_img = ? WHERE user_id = ?";
 
         try (Connection conn = DBConnection.getConnection()) {
             try (PreparedStatement duplicatePst = conn.prepareStatement(duplicateCheckQuery)) {
-                duplicatePst.setString(1, email);
-                duplicatePst.setInt(2, userId);
+                duplicatePst.setString(1, user.getEmail());
+                duplicatePst.setInt(2, user.getId());
                 try (ResultSet rs = duplicatePst.executeQuery()) {
                     if (rs.next()) {
                         return false;
@@ -133,10 +133,11 @@ public class UserDAO {
             }
 
             try (PreparedStatement updatePst = conn.prepareStatement(updateQuery)) {
-                updatePst.setString(1, fullName);
-                updatePst.setString(2, email);
-                updatePst.setString(3, phoneNumber);
-                updatePst.setInt(4, userId);
+                updatePst.setString(1, user.getFullName());
+                updatePst.setString(2, user.getEmail());
+                updatePst.setString(3, user.getPhoneNumber());
+                updatePst.setString(4, user.getProfileImg());
+                updatePst.setInt(5, user.getId());
                 return updatePst.executeUpdate() > 0;
             }
         } catch (Exception e) {
@@ -175,6 +176,7 @@ public class UserDAO {
                     user.setPassword(rs.getString("password"));
                     user.setRole(rs.getString("role_name"));
                     user.setStatus(rs.getString("status"));
+                    user.setProfileImg(rs.getString("profile_img"));
                     user.setCreatedAt(rs.getString("created_at"));
                     return user;
                 }

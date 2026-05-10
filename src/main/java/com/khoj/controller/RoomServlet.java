@@ -35,8 +35,8 @@ public class RoomServlet extends HttpServlet {
         String servletPath = request.getServletPath();
 
         if ("/add-room".equals(servletPath)) {
-            // Serve the Add Room form with property types dynamically extracted from current listings
-            List<PropertyType> types = propertyService.getUniquePropertyTypes();
+            // Serve the Add Room form with all supported property types
+            List<PropertyType> types = propertyService.getAllPropertyTypes();
             request.setAttribute("propertyTypes", types);
             request.getRequestDispatcher("/views/landlord/add-room.jsp").forward(request, response);
         } else {

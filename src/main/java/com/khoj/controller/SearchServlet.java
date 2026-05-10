@@ -23,6 +23,10 @@ public class SearchServlet extends HttpServlet {
         String priceModel = request.getParameter("priceModel");
         String theme = request.getParameter("theme");
         
+        // Fetch dynamic property types for the dropdown
+        List<com.khoj.model.PropertyType> propertyTypes = propertyService.getAllPropertyTypes();
+        request.setAttribute("propertyTypes", propertyTypes);
+        
         // Filter parameters
         String minPriceStr = request.getParameter("minPrice");
         String maxPriceStr = request.getParameter("maxPrice");

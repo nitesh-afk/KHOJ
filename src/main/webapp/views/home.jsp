@@ -616,16 +616,16 @@
                                 <a href="${pageContext.request.contextPath}/AdminServlet" class="nav-link">Admin Panel</a>
                             </c:when>
                             <c:when test="${sessionScope.user.role == 'LANDLORD'}">
-                                <a href="${pageContext.request.contextPath}/LandlordDashboard" class="nav-link">Landlord Panel</a>
+                                <a href="${pageContext.request.contextPath}/landlord/dashboard" class="nav-link">Landlord Panel</a>
                             </c:when>
                             <c:otherwise>
                                 <a href="${pageContext.request.contextPath}/search" class="nav-link">Dashboard</a>
                             </c:otherwise>
                         </c:choose>
-                        <div class="user-badge">
+                        <a href="${pageContext.request.contextPath}/profile" class="user-badge" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 8px;">
                             <i class="fa-solid fa-circle-user" style="color: var(--accent-gold); font-size: 1.2rem;"></i>
                             ${sessionScope.user.fullName}
-                        </div>
+                        </a>
                         <a href="${pageContext.request.contextPath}/LogoutServlet" class="nav-link" style="color: rgba(255,255,255,0.7);">Logout</a>
                     </c:when>
                     <c:otherwise>
@@ -652,7 +652,7 @@
                     <select name="type">
                         <option value="">All Types</option>
                         <c:forEach var="type" items="${propertyTypes}">
-                            <option value="${type.typeId}">${type.name}</option>
+                            <option value="${type.name}">${type.name}</option>
                         </c:forEach>
                     </select>
                 </div>

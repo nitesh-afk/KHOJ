@@ -534,16 +534,18 @@
                 <div class="logo-subtitle">Tenant Portal</div>
             </div>
             <hr class="sidebar-divider">
-            <div class="superuser-badge">
-                <div class="superuser-avatar">${not empty sessionScope.user.fullName ? sessionScope.user.fullName.substring(0,1) : 'T'}</div>
-                <div class="superuser-info">
-                    <span class="superuser-name">${sessionScope.user.fullName}</span>
-                    <span class="superuser-role">TENANT</span>
+            <a href="${pageContext.request.contextPath}/profile" class="profile-link" style="text-decoration: none; color: inherit; display: block;">
+                <div class="superuser-badge">
+                    <div class="superuser-avatar">${not empty sessionScope.user.fullName ? sessionScope.user.fullName.substring(0,1) : 'T'}</div>
+                    <div class="superuser-info">
+                        <span class="superuser-name">${sessionScope.user.fullName}</span>
+                        <span class="superuser-role">TENANT</span>
+                    </div>
                 </div>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/search" class="active"><i class="fa-solid fa-compass"></i> Property Discovery</a></li>
-                <li><a href="${pageContext.request.contextPath}/ViewApplications"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
+                <li><a href="${pageContext.request.contextPath}/tenant/applications"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
                 <li><a href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
                 <li><a href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
             </ul>
@@ -588,10 +590,9 @@
                 <label>Property Type</label>
                 <select name="type">
                     <option value="">All Types</option>
-                    <option value="Apartment" ${searchType == 'Apartment' ? 'selected' : ''}>Apartment</option>
-                    <option value="Hostel" ${searchType == 'Hostel' ? 'selected' : ''}>Hostel</option>
-                    <option value="Hotel" ${searchType == 'Hotel' ? 'selected' : ''}>Hotel</option>
-                    <option value="Villa" ${searchType == 'Villa' ? 'selected' : ''}>Villa</option>
+                    <c:forEach var="pt" items="${propertyTypes}">
+                        <option value="${pt.name}" ${searchType == pt.name ? 'selected' : ''}>${pt.name}</option>
+                    </c:forEach>
                 </select>
             </div>
 
@@ -601,6 +602,15 @@
                     <input type="number" name="minPrice" placeholder="Min" value="${param.minPrice}">
                     <input type="number" name="maxPrice" placeholder="Max" value="${param.maxPrice}">
                 </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Payment Model</label>
+                <select name="priceModel">
+                    <option value="">Any</option>
+                    <option value="Monthly" ${searchPriceModel == 'Monthly' ? 'selected' : ''}>Monthly Rent</option>
+                    <option value="Daily" ${searchPriceModel == 'Daily' ? 'selected' : ''}>Daily Rate</option>
+                </select>
             </div>
 
             <div class="filter-group">

@@ -155,6 +155,18 @@ public class ApplicationDAO {
         }
     }
 
+    public int countApplicationsByTenant(int tenantId) {
+        String query = "SELECT COUNT(*) FROM applications WHERE tenant_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, tenantId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
     private Application mapResultSetToApplication(ResultSet rs, String tName, String tEmail, String lName, String lEmail) throws SQLException {
         Application app = new Application();
         app.setAppId(rs.getInt("app_id"));

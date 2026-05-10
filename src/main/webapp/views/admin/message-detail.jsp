@@ -100,7 +100,7 @@
                 </div>
             </div>
             <ul class="nav-links">
-                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/messages" class="active"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
@@ -140,7 +140,7 @@
                         <i class="fa-solid fa-arrow-left"></i> Back to Inbox
                     </a>
                     <c:if test="${message.status != 'ARCHIVED'}">
-                        <form action="${pageContext.request.contextPath}/AdminServlet" method="POST" style="margin:0;">
+                        <form action="${pageContext.request.contextPath}/admin/dashboard" method="POST" style="margin:0;">
                             <input type="hidden" name="action" value="updateMessageStatus">
                             <input type="hidden" name="messageId" value="${message.id}">
                             <input type="hidden" name="status" value="ARCHIVED">

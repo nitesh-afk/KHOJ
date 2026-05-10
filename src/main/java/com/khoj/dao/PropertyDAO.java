@@ -19,6 +19,18 @@ import com.khoj.util.DBConnection;
 
 public class PropertyDAO {
 
+    public int countPropertiesByLandlord(int landlordId) {
+        String query = "SELECT COUNT(*) FROM properties WHERE landlord_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, landlordId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
     /**
      * Query 1: Fetches a single property by ID with all relational data joined.
      */
@@ -148,7 +160,7 @@ public class PropertyDAO {
      */
     public List<Property> getPropertiesByTheme(String themeName) {
         List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name, u.email as landlord_email, u.phone_number as landlord_phone "
                 +
                 "FROM properties p " +
                 "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
@@ -214,7 +226,7 @@ public class PropertyDAO {
                                           Integer bedrooms, int limit, int offset) {
         List<Property> properties = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-                "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
+                "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name, u.email as landlord_email, u.phone_number as landlord_phone "
                         + "FROM properties p " 
                         + "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " 
                         + "LEFT JOIN cities c ON n.city_id = c.city_id " 
@@ -284,7 +296,7 @@ public class PropertyDAO {
      */
     public List<Property> getPropertiesByLandlord(int landlordId) {
         List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name, u.email as landlord_email, u.phone_number as landlord_phone "
                 +
                 "FROM properties p " +
                 "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
@@ -536,7 +548,7 @@ public class PropertyDAO {
      */
     public List<Property> getAllProperties() {
         List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name, u.email as landlord_email, u.phone_number as landlord_phone "
                 +
                 "FROM properties p " +
                 "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
@@ -614,7 +626,7 @@ public class PropertyDAO {
 
     public List<Property> getVerifiedProperties(int limit) {
         List<Property> properties = new ArrayList<>();
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name, u.email as landlord_email, u.phone_number as landlord_phone "
                 +
                 "FROM properties p " +
                 "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
@@ -752,5 +764,22 @@ public class PropertyDAO {
             if (rs.next()) return rs.getInt(1);
         } catch (SQLException e) { e.printStackTrace(); }
         return 0;
+    }
+
+    public List<String> getAvailableTypeNames() {
+        List<String> types = new ArrayList<>();
+        String query = "SELECT DISTINCT pt.type_name FROM properties p " +
+                       "JOIN property_types pt ON p.type_id = pt.type_id " +
+                       "WHERE p.availability_status = 'AVAILABLE' ORDER BY pt.type_name ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                types.add(rs.getString("type_name"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return types;
     }
 }

@@ -288,7 +288,7 @@
                 </div>
             </div>
             <ul class="nav-links">
-                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/rooms" class="active"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
@@ -342,16 +342,14 @@
                                     </td>
                                     <td>
                                         <c:if test="${!room.verified}">
-                                            <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                                <input type="hidden" name="action" value="verifyProperty">
+                                            <form action="${pageContext.request.contextPath}/admin/verify-property" method="post" style="display: inline;">
                                                 <input type="hidden" name="propertyId" value="${room.propertyId}">
                                                 <input type="hidden" name="verify" value="true">
                                                 <button type="submit" class="btn btn-approve-lg">Approve Listing</button>
                                             </form>
                                         </c:if>
                                         <c:if test="${room.verified}">
-                                            <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                                <input type="hidden" name="action" value="verifyProperty">
+                                            <form action="${pageContext.request.contextPath}/admin/verify-property" method="post" style="display: inline;">
                                                 <input type="hidden" name="propertyId" value="${room.propertyId}">
                                                 <input type="hidden" name="verify" value="false">
                                                 <button type="submit" class="btn btn-revoke-lg">Revoke</button>

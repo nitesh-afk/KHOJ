@@ -223,7 +223,7 @@
             <h2 style="margin: 0; color: var(--accent-gold); font-weight: 800; cursor: pointer;" onclick="window.location.href='home'">KHOJ</h2>
             <nav style="display: flex; gap: 20px; color: rgba(255,255,255,0.7); font-size: 0.9rem;">
                 <a href="home" style="color: inherit; text-decoration: none;">Explore</a>
-                <a href="${sessionScope.user.role == 'TENANT' ? 'tenant/dashboard' : 'landlord/dashboard'}" style="color: inherit; text-decoration: none;">Dashboard</a>
+                <a href="${pageContext.request.contextPath}/${sessionScope.user.role == 'TENANT' ? 'tenant/dashboard' : 'landlord/dashboard'}" style="color: inherit; text-decoration: none;">Dashboard</a>
             </nav>
         </div>
     </header>

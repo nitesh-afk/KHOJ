@@ -414,19 +414,22 @@
     <h2 class="sidebar-logo">KHOJ</h2>
     <span class="sidebar-tagline">Landlord Portal</span>
     <ul class="nav-links">
-        <li><a href="${pageContext.request.contextPath}/LandlordDashboard" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+        <li><a href="${pageContext.request.contextPath}/landlord/dashboard" class="active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
         <li><a href="${pageContext.request.contextPath}/my-rooms"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
         <li><a href="${pageContext.request.contextPath}/add-room"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
-        <li><a href="${pageContext.request.contextPath}/applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
+        <li><a href="${pageContext.request.contextPath}/landlord/inbound-applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
     </ul>
     <div class="sidebar-bottom">
-        <div class="user-profile">
-            <div class="user-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
-            <div class="user-info">
-                <span class="user-name">${sessionScope.user.fullName}</span>
-                <span class="user-role">Landlord</span>
+        <a href="${pageContext.request.contextPath}/profile" class="user-profile-link" style="text-decoration: none; color: inherit; display: block; transition: all 0.3s ease;">
+            <div class="user-profile">
+                <div class="user-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
+                <div class="user-info">
+                    <span class="user-name">${sessionScope.user.fullName}</span>
+                    <span class="user-role">Landlord</span>
+                </div>
+                <i class="fa-solid fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;"></i>
             </div>
-        </div>
+        </a>
         <a href="${pageContext.request.contextPath}/LogoutServlet" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
     </div>
 </div>
@@ -449,18 +452,18 @@
     <div class="stats-grid">
         <div class="stat-card">
             <div class="stat-icon" style="background: #FFF3DC; color: var(--accent-gold);"><i class="fa-solid fa-building"></i></div>
-            <div class="stat-value">${totalProperties}</div>
+            <div class="stat-value">${stats.total}</div>
             <p class="stat-label">Total Properties</p>
         </div>
         <div class="stat-card">
             <div class="stat-icon" style="background: var(--badge-verified-bg); color: var(--badge-verified-color);"><i class="fa-solid fa-shield-halved"></i></div>
-            <div class="stat-value">${totalProperties}</div>
+            <div class="stat-value">${stats.verified}</div>
             <p class="stat-label">Verified Listings</p>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: var(--badge-rejected-bg); color: #B91C1C;"><i class="fa-solid fa-clock"></i></div>
-            <div class="stat-value">0</div>
-            <p class="stat-label">Pending Inquiries</p>
+            <div class="stat-icon" style="background: var(--badge-pending-bg); color: var(--badge-pending-color);"><i class="fa-solid fa-clock"></i></div>
+            <div class="stat-value">${stats.pending}</div>
+            <p class="stat-label">Pending Verification</p>
         </div>
     </div>
 

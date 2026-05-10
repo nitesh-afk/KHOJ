@@ -366,13 +366,12 @@
                                     <td>
                                         <c:if test="${user.role == 'LANDLORD' && user.status != 'VERIFIED'}">
                                             <form action="${pageContext.request.contextPath}/admin/update-user-status" method="post" style="display: inline;">
-                                                <input type="hidden" name="action" value="verifyLandlord">
                                                 <input type="hidden" name="userId" value="${user.id}">
+                                                <input type="hidden" name="status" value="VERIFIED">
                                                 <button type="submit" class="btn btn-verify">Verify</button>
                                             </form>
                                         </c:if>
-                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                            <input type="hidden" name="action" value="deleteUser">
+                                        <form action="${pageContext.request.contextPath}/admin/delete-user" method="post" style="display: inline;">
                                             <input type="hidden" name="userId" value="${user.id}">
                                             <button type="submit" class="btn btn-delete-lg" onclick="return confirm('Delete this user permanently?')">Delete</button>
                                         </form>

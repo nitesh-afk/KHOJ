@@ -176,7 +176,7 @@
         <div class="logo">KHOJ</div>
         <div class="logo-subtitle">Admin Control</div>
         <ul class="nav-links">
-            <li><a href="${pageContext.request.contextPath}/AdminServlet">Command Center</a></li>
+            <li><a href="${pageContext.request.contextPath}/admin/dashboard">Command Center</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/rooms">Property Moderation</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/users">User Governance</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/analytics" class="active">Analytics</a></li>
@@ -292,12 +292,12 @@
                             <td>${landlord.fullName}</td>
                             <td>${landlord.email}</td>
                             <td>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display:inline;">
+                                <form action="${pageContext.request.contextPath}/admin/dashboard" method="post" style="display:inline;">
                                     <input type="hidden" name="action" value="approveLandlord">
                                     <input type="hidden" name="userId" value="${landlord.id}">
                                     <button type="submit" class="btn btn-approve">Approve</button>
                                 </form>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display:inline;">
+                                <form action="${pageContext.request.contextPath}/admin/dashboard" method="post" style="display:inline;">
                                     <input type="hidden" name="action" value="rejectLandlord">
                                     <input type="hidden" name="userId" value="${landlord.id}">
                                     <button type="submit" class="btn btn-reject">Reject</button>

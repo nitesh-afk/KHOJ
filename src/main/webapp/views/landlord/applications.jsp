@@ -352,7 +352,7 @@
         <li><a href="${pageContext.request.contextPath}/landlord/inbound-applications" class="active"><i class="fa-solid fa-inbox"></i> Applications</a></li>
     </ul>
     <div class="sidebar-bottom">
-        <div class="user-profile">
+        <a href="${pageContext.request.contextPath}/profile" class="user-profile-link" style="text-decoration: none; color: inherit; display: block; transition: all 0.3s ease;"><div class="user-profile">
             <div class="user-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
             <div class="user-info">
                 <span class="user-name">${sessionScope.user.fullName}</span>

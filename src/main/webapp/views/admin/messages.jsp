@@ -31,7 +31,7 @@
                 </div>
             </div>
             <ul class="nav-links">
-                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/messages" class="active"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
@@ -97,8 +97,7 @@
                                 </td>
                                 <td>
                                     <c:if test="${msg.status != 'ARCHIVED'}">
-                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="POST" style="margin:0;">
-                                            <input type="hidden" name="action" value="updateMessageStatus">
+                                        <form action="${pageContext.request.contextPath}/admin/update-message-status" method="POST" style="margin:0;">
                                             <input type="hidden" name="messageId" value="${msg.id}">
                                             <input type="hidden" name="status" value="ARCHIVED">
                                             <button type="submit" class="btn-action btn-archive">

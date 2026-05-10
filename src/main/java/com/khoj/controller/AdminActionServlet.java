@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet({"/admin/verify-property", "/admin/approve-landlord", "/admin/reject-landlord", "/admin/update-user-status"})
+@WebServlet({"/admin/verify-property", "/admin/approve-landlord", "/admin/reject-landlord", "/admin/update-user-status", "/admin/deactivate-user", "/admin/reactivate-user", "/admin/delete-user", "/admin/update-message-status"})
 public class AdminActionServlet extends HttpServlet {
     private final AdminDAO adminDAO = new AdminDAO();
 
@@ -55,6 +55,27 @@ public class AdminActionServlet extends HttpServlet {
                     String status = request.getParameter("status");
                     success = adminDAO.setUserStatus(userId, status);
                     response.sendRedirect(request.getContextPath() + "/admin/user-approval?success=" + success);
+                    break;
+                case "/admin/deactivate-user":
+                    int deId = Integer.parseInt(request.getParameter("userId"));
+                    success = adminDAO.setUserStatus(deId, "DEACTIVATED");
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard?success=" + success);
+                    break;
+                case "/admin/reactivate-user":
+                    int reId = Integer.parseInt(request.getParameter("userId"));
+                    success = adminDAO.setUserStatus(reId, "ACTIVE");
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard?success=" + success);
+                    break;
+                case "/admin/delete-user":
+                    int delId = Integer.parseInt(request.getParameter("userId"));
+                    success = adminDAO.deleteUser(delId);
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard?success=" + success);
+                    break;
+                case "/admin/update-message-status":
+                    int messageId = Integer.parseInt(request.getParameter("messageId"));
+                    String statusStr = request.getParameter("status");
+                    success = adminDAO.updateMessageStatus(messageId, statusStr);
+                    response.sendRedirect(request.getContextPath() + "/admin/messages?success=" + success);
                     break;
 
                 default:

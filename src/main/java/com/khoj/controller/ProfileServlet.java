@@ -33,8 +33,27 @@ public class ProfileServlet extends HttpServlet {
         }
 
         User profileUser = userService.getUserById(sessionUser.getId());
+        
+        if (profileUser == null) {
+            response.sendRedirect(request.getContextPath() + "/profile?error=user_not_found");
+            return;
+        }
+        
+        // Activity Summary Logic
+        int activityCount = 0;
+        if ("LANDLORD".equalsIgnoreCase(profileUser.getRole())) {
+            com.khoj.dao.PropertyDAO propDAO = new com.khoj.dao.PropertyDAO();
+            activityCount = propDAO.countPropertiesByLandlord(profileUser.getId());
+            request.setAttribute("activityLabel", "Properties Listed");
+        } else if ("TENANT".equalsIgnoreCase(profileUser.getRole())) {
+            com.khoj.dao.ApplicationDAO appDAO = new com.khoj.dao.ApplicationDAO();
+            activityCount = appDAO.countApplicationsByTenant(profileUser.getId());
+            request.setAttribute("activityLabel", "Applications Sent");
+        }
+        
+        request.setAttribute("activityCount", activityCount);
         request.setAttribute("profileUser", profileUser);
-        request.getRequestDispatcher("/views/tenant/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/profile.jsp").forward(request, response);
     }
 
     @Override
@@ -94,16 +113,18 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        boolean updated = userService.updateProfile(userId, fullName.trim(), email.trim(), phone);
+        existingUser.setFullName(fullName.trim());
+        existingUser.setEmail(email.trim());
+        existingUser.setPhoneNumber(phone);
+        // Profile image is kept as is for now, but ready for extension
+        
+        boolean updated = userService.updateUserProfile(existingUser);
         if (!updated) {
             response.sendRedirect(request.getContextPath() + "/profile?error=update_failed");
             return;
         }
 
-        User refreshedUser = userService.getUserById(userId);
-        if (refreshedUser != null) {
-            session.setAttribute("user", refreshedUser);
-        }
+        session.setAttribute("user", existingUser);
         response.sendRedirect(request.getContextPath() + "/profile?success=true");
     }
 

@@ -19,15 +19,17 @@
                 <div class="logo-subtitle">Admin Control</div>
             </div>
             <hr class="sidebar-divider">
-            <div class="superuser-badge">
-                <div class="superuser-avatar">A</div>
-                <div class="superuser-info">
-                    <span class="superuser-name">System Admin</span>
-                    <span class="superuser-role">SUPERUSER</span>
+            <a href="${pageContext.request.contextPath}/profile" class="profile-link" style="text-decoration: none; color: inherit; display: block;">
+                <div class="superuser-badge">
+                    <div class="superuser-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
+                    <div class="superuser-info">
+                        <span class="superuser-name">${sessionScope.user.fullName}</span>
+                        <span class="superuser-role">SUPERUSER</span>
+                    </div>
                 </div>
-            </div>
+            </a>
             <ul class="nav-links">
-                <li><a href="${pageContext.request.contextPath}/AdminServlet" class="active"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard" class="active"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/messages"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
@@ -101,7 +103,7 @@
                             <td>${room.createdAt}</td>
                             <td>
                                 <div style="display: flex; gap: 8px;">
-                                    <form action="${pageContext.request.contextPath}/AdminServlet" method="post">
+                                    <form action="${pageContext.request.contextPath}/admin/dashboard" method="post">
                                         <input type="hidden" name="action" value="approveProperty">
                                         <input type="hidden" name="propertyId" value="${room.propertyId}">
                                         <button type="submit" class="btn btn-approve" style="background: #10b981; color: white;">
@@ -109,7 +111,7 @@
                                         </button>
                                     </form>
                                     
-                                    <form action="${pageContext.request.contextPath}/AdminServlet" method="post">
+                                    <form action="${pageContext.request.contextPath}/admin/dashboard" method="post">
                                         <input type="hidden" name="action" value="rejectProperty">
                                         <input type="hidden" name="propertyId" value="${room.propertyId}">
                                         <button type="submit" class="btn btn-delete" style="background: #ef4444; color: white;" onclick="return confirm('Reject and Delete this property listing?')">
@@ -167,8 +169,7 @@
                             <td>
                                 <c:choose>
                                     <c:when test="${u.status == 'ACTIVE'}">
-                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                            <input type="hidden" name="action" value="deactivateUser">
+                                        <form action="${pageContext.request.contextPath}/admin/deactivate-user" method="post" style="display: inline;">
                                             <input type="hidden" name="userId" value="${u.id}">
                                             <input type="hidden" name="userRole" value="TENANT">
                                             <button type="submit" class="btn btn-deactivate" onclick="return confirm('Are you sure you want to deactivate this tenant?')">
@@ -177,8 +178,7 @@
                                         </form>
                                     </c:when>
                                     <c:otherwise>
-                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                            <input type="hidden" name="action" value="reactivateUser">
+                                        <form action="${pageContext.request.contextPath}/admin/reactivate-user" method="post" style="display: inline;">
                                             <input type="hidden" name="userId" value="${u.id}">
                                             <button type="submit" class="btn btn-approve">
                                                 Reactivate
@@ -186,8 +186,7 @@
                                         </form>
                                     </c:otherwise>
                                 </c:choose>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline; margin-left: 8px;">
-                                    <input type="hidden" name="action" value="deleteUser">
+                                <form action="${pageContext.request.contextPath}/admin/delete-user" method="post" style="display: inline; margin-left: 8px;">
                                     <input type="hidden" name="userId" value="${u.id}">
                                     <button type="submit" class="btn btn-delete" onclick="return confirm('CRITICAL: This will permanently delete the tenant. Continue?')">
                                         Delete
@@ -231,8 +230,7 @@
                             <td>
                                 <c:choose>
                                     <c:when test="${u.status == 'ACTIVE'}">
-                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                            <input type="hidden" name="action" value="deactivateUser">
+                                        <form action="${pageContext.request.contextPath}/admin/deactivate-user" method="post" style="display: inline;">
                                             <input type="hidden" name="userId" value="${u.id}">
                                             <input type="hidden" name="userRole" value="LANDLORD">
                                             <button type="submit" class="btn btn-deactivate" onclick="return confirm('WARNING: Deactivating this landlord will automatically UNPUBLISH all their active property listings. Continue?')">
@@ -241,8 +239,7 @@
                                         </form>
                                     </c:when>
                                     <c:otherwise>
-                                        <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                            <input type="hidden" name="action" value="reactivateUser">
+                                        <form action="${pageContext.request.contextPath}/admin/reactivate-user" method="post" style="display: inline;">
                                             <input type="hidden" name="userId" value="${u.id}">
                                             <button type="submit" class="btn btn-approve">
                                                 Reactivate
@@ -250,8 +247,7 @@
                                         </form>
                                     </c:otherwise>
                                 </c:choose>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline; margin-left: 8px;">
-                                    <input type="hidden" name="action" value="deleteUser">
+                                <form action="${pageContext.request.contextPath}/admin/delete-user" method="post" style="display: inline; margin-left: 8px;">
                                     <input type="hidden" name="userId" value="${u.id}">
                                     <button type="submit" class="btn btn-delete" onclick="return confirm('CRITICAL: This will permanently delete the landlord and ALL their properties. Continue?')">
                                         Delete

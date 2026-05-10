@@ -331,16 +331,20 @@
       <div class="logo-subtitle">Tenant Portal</div>
     </div>
     <hr class="sidebar-divider">
-    <div class="superuser-badge">
-      <div class="superuser-avatar">${not empty sessionScope.user.fullName ? sessionScope.user.fullName.substring(0,1) : 'T'}</div>
-      <div class="superuser-info">
-        <span class="superuser-name">${sessionScope.user.fullName}</span>
-        <span class="superuser-role">TENANT</span>
+    <a href="${pageContext.request.contextPath}/profile" class="profile-link" style="text-decoration: none; color: inherit; display: block;">
+      <div class="superuser-badge">
+        <div class="superuser-avatar">${not empty sessionScope.user.fullName ? sessionScope.user.fullName.substring(0,1) : 'T'}</div>
+        <div class="superuser-info">
+          <span class="superuser-name">${sessionScope.user.fullName}</span>
+          <span class="superuser-role">TENANT</span>
+        </div>
       </div>
-    </div>
+    </a>
     <ul class="nav-links">
       <li><a href="${pageContext.request.contextPath}/search"><i class="fa-solid fa-compass"></i> Property Discovery</a></li>
-      <li><a href="${pageContext.request.contextPath}/my-bookings" class="active"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
+      <li><a href="${pageContext.request.contextPath}/tenant/applications" class="active"><i class="fa-solid fa-bookmark"></i> My Applications</a></li>
+      <li><a href="${pageContext.request.contextPath}/wishlist"><i class="fa-solid fa-heart"></i> My Wishlist</a></li>
+      <li><a href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
     </ul>
   </div>
   <div class="sidebar-bottom">

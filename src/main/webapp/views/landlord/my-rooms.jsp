@@ -325,19 +325,22 @@
         <h2 class="sidebar-logo">KHOJ</h2>
         <span class="sidebar-tagline">Landlord Portal</span>
         <ul class="nav-links">
-            <li><a href="${pageContext.request.contextPath}/LandlordDashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+            <li><a href="${pageContext.request.contextPath}/landlord/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
             <li><a href="${pageContext.request.contextPath}/my-rooms" class="active"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
             <li><a href="${pageContext.request.contextPath}/add-room"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
-            <li><a href="${pageContext.request.contextPath}/applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
+            <li><a href="${pageContext.request.contextPath}/landlord/inbound-applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
         </ul>
         <div class="sidebar-bottom">
-            <div class="user-profile">
-                <div class="user-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
-                <div class="user-info">
-                    <span class="user-name">${sessionScope.user.fullName}</span>
-                    <span class="user-role">Landlord</span>
+            <a href="${pageContext.request.contextPath}/profile" class="user-profile-link" style="text-decoration: none; color: inherit; display: block; transition: all 0.3s ease;">
+                <div class="user-profile">
+                    <div class="user-avatar">${fn:substring(sessionScope.user.fullName, 0, 1)}</div>
+                    <div class="user-info">
+                        <span class="user-name">${sessionScope.user.fullName}</span>
+                        <span class="user-role">Landlord</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="margin-left: auto; font-size: 0.8rem; opacity: 0.5;"></i>
                 </div>
-            </div>
+            </a>
             <a href="${pageContext.request.contextPath}/LogoutServlet" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Sign out</a>
         </div>
     </div>

@@ -92,7 +92,7 @@ public class PropertyService {
         return propertyDAO.getAllPropertyTypes();
     }
 
-    public List<PropertyType> getUniquePropertyTypes() {
-        return propertyDAO.getUniquePropertyTypes();
+    public List<String> getAvailableTypeNames() {
+        return propertyDAO.getAvailableTypeNames();
     }
 }
