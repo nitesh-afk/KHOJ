@@ -21,7 +21,7 @@ public class ReviewDAO {
             return false;
         }
 
-        String sql = "INSERT INTO property_reviews (tenant_id, property_id, rating, comment) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO reviews (tenant_id, property_id, rating, comment) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -39,7 +39,7 @@ public class ReviewDAO {
     }
 
     public boolean hasReviewed(int tenantId, int propertyId) {
-        String sql = "SELECT 1 FROM property_reviews WHERE tenant_id = ? AND property_id = ? LIMIT 1";
+        String sql = "SELECT 1 FROM reviews WHERE tenant_id = ? AND property_id = ? LIMIT 1";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -58,11 +58,11 @@ public class ReviewDAO {
 
     public List<Review> getReviewsByProperty(int propertyId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT pr.review_id, pr.tenant_id, pr.property_id, pr.rating, pr.comment, pr.created_at, u.full_name AS tenant_name "
-                + "FROM property_reviews pr "
-                + "JOIN users u ON pr.tenant_id = u.user_id "
-                + "WHERE pr.property_id = ? "
-                + "ORDER BY pr.created_at DESC";
+        String sql = "SELECT r.review_id, r.tenant_id, r.property_id, r.rating, r.comment, r.created_at, u.full_name AS tenant_name "
+                + "FROM reviews r "
+                + "JOIN users u ON r.tenant_id = u.user_id "
+                + "WHERE r.property_id = ? "
+                + "ORDER BY r.created_at DESC";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -90,7 +90,7 @@ public class ReviewDAO {
     }
 
     public double getAverageRating(int propertyId) {
-        String sql = "SELECT AVG(rating) AS average_rating FROM property_reviews WHERE property_id = ?";
+        String sql = "SELECT AVG(rating) AS average_rating FROM reviews WHERE property_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {

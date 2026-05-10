@@ -202,18 +202,18 @@
             margin: 0;
         }
 
-        .success-banner {
-            background: var(--badge-accepted-bg);
-            border-left: 4px solid var(--badge-accepted-color);
-            border-radius: 0 10px 10px 0;
-            color: var(--badge-accepted-color);
-            font-weight: 600;
-            padding: 14px 20px;
-            margin-bottom: 32px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        <c:if test="${not empty sessionScope.successMsg}">
+            <div class="success-banner" style="background: rgba(216, 243, 220, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(183, 228, 199, 0.5); color: #2D6A4F;">
+                <i class="fa-solid fa-circle-check"></i> ${sessionScope.successMsg}
+                <% session.removeAttribute("successMsg"); %>
+            </div>
+        </c:if>
+        <c:if test="${not empty sessionScope.errorMsg}">
+            <div class="success-banner" style="background: rgba(254, 242, 242, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(254, 202, 202, 0.5); color: #991b1b;">
+                <i class="fa-solid fa-circle-exclamation"></i> ${sessionScope.errorMsg}
+                <% session.removeAttribute("errorMsg"); %>
+            </div>
+        </c:if>
 
         .table-card {
             background: var(--card-surface);
@@ -346,10 +346,10 @@
     <h2 class="sidebar-logo">KHOJ</h2>
     <span class="sidebar-tagline">Landlord Portal</span>
     <ul class="nav-links">
-        <li><a href="${pageContext.request.contextPath}/LandlordDashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+        <li><a href="${pageContext.request.contextPath}/landlord/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
         <li><a href="${pageContext.request.contextPath}/my-rooms"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
         <li><a href="${pageContext.request.contextPath}/add-room"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
-        <li><a href="${pageContext.request.contextPath}/applications" class="active"><i class="fa-solid fa-inbox"></i> Applications</a></li>
+        <li><a href="${pageContext.request.contextPath}/landlord/inbound-applications" class="active"><i class="fa-solid fa-inbox"></i> Applications</a></li>
     </ul>
     <div class="sidebar-bottom">
         <div class="user-profile">
@@ -369,9 +369,16 @@
         <p class="subtitle">Review and respond to tenant inquiries for your properties.</p>
     </div>
 
-    <c:if test="${param.msg == 'status_updated'}">
-        <div class="success-banner">
-            <i class="fa-solid fa-circle-check"></i> Application status updated successfully!
+    <c:if test="${not empty sessionScope.successMsg}">
+        <div class="success-banner" style="background: rgba(216, 243, 220, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(183, 228, 199, 0.5); color: #2D6A4F;">
+            <i class="fa-solid fa-circle-check"></i> ${sessionScope.successMsg}
+            <% session.removeAttribute("successMsg"); %>
+        </div>
+    </c:if>
+    <c:if test="${not empty sessionScope.errorMsg}">
+        <div class="success-banner" style="background: rgba(254, 242, 242, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(254, 202, 202, 0.5); color: #991b1b;">
+            <i class="fa-solid fa-circle-exclamation"></i> ${sessionScope.errorMsg}
+            <% session.removeAttribute("errorMsg"); %>
         </div>
     </c:if>
 
@@ -381,6 +388,7 @@
             <tr>
                 <th>Tenant</th>
                 <th>Property</th>
+                <th>Applied On</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -394,23 +402,23 @@
                     </td>
                     <td style="font-weight: 500;">${app.propertyTitle}</td>
                     <td>
-                                <span class="badge badge-${app.status}">
-                                        ${app.status}
-                                </span>
+                        <fmt:parseDate value="${app.appliedAt}" pattern="yyyy-MM-dd HH:mm:ss" var="parsedDate" />
+                        <fmt:formatDate value="${parsedDate}" pattern="MMM dd, yyyy" />
+                    </td>
+                    <td>
+                        <span class="badge badge-${app.status}">
+                            ${app.status}
+                        </span>
                     </td>
                     <td>
                         <c:if test="${app.status == 'PENDING'}">
-                            <form action="${pageContext.request.contextPath}/applications" method="post" style="display: inline;">
-                                <input type="hidden" name="appId" value="${app.appId}">
-                                <input type="hidden" name="status" value="ACCEPTED">
-                                <button type="submit" class="btn-accept">Accept</button>
-                            </form>
-                            <form action="${pageContext.request.contextPath}/applications" method="post" style="display: inline;">
-                                <input type="hidden" name="appId" value="${app.appId}">
-                                <input type="hidden" name="status" value="REJECTED">
-                                <button type="submit" class="btn-reject">Reject</button>
-                            </form>
+                            <a href="${pageContext.request.contextPath}/landlord/action-application?appId=${app.appId}&action=ACCEPT" class="btn-accept" style="text-decoration: none;">Accept</a>
+                            <a href="${pageContext.request.contextPath}/landlord/action-application?appId=${app.appId}&action=REJECT" class="btn-reject" style="text-decoration: none;">Reject</a>
                         </c:if>
+                        <a href="${pageContext.request.contextPath}/messages?with=${app.tenantId}&property=${app.propertyId}" 
+                           style="display: inline-block; margin-left: 8px; color: var(--accent-gold); font-weight: 600; text-decoration: none; font-size: 0.85rem;">
+                           <i class="fa-solid fa-comments"></i> Chat
+                        </a>
                         <c:if test="${app.status != 'PENDING'}">
                             <span class="processed-text">Processed</span>
                         </c:if>

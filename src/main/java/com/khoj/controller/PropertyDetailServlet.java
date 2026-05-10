@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.khoj.dao.ApplicationDAO;
 import java.io.IOException;
 import java.util.List;
 
@@ -43,13 +44,17 @@ public class PropertyDetailServlet extends HttpServlet {
                     HttpSession session = request.getSession(false);
                     User sessionUser = (session != null) ? (User) session.getAttribute("user") : null;
                     boolean isWishlisted = false;
+                    boolean hasApplied = false;
                     if (sessionUser != null && "TENANT".equalsIgnoreCase(sessionUser.getRole())) {
                         isWishlisted = wishlistService.isWishlisted(sessionUser.getId(), propertyId);
+                        ApplicationDAO appDAO = new ApplicationDAO();
+                        hasApplied = appDAO.hasApplied(sessionUser.getId(), propertyId);
                     }
                     request.setAttribute("property", property);
                     request.setAttribute("reviews", reviews);
                     request.setAttribute("avgRating", avgRating);
                     request.setAttribute("isWishlisted", isWishlisted);
+                    request.setAttribute("hasApplied", hasApplied);
                     request.getRequestDispatcher("/views/property-detail.jsp").forward(request, response);
                 } else {
                     response.sendRedirect("home?error=PropertyNotFound");
@@ -60,5 +65,12 @@ public class PropertyDetailServlet extends HttpServlet {
         } else {
             response.sendRedirect("home");
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        // Application logic moved to ApplicationServlet.java
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 }

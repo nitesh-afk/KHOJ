@@ -17,7 +17,7 @@ public class WishlistDAO {
             return true;
         }
 
-        String sql = "INSERT INTO wishlist (tenant_id, property_id) VALUES (?, ?)";
+        String sql = "INSERT INTO wishlists (tenant_id, property_id) VALUES (?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -35,7 +35,7 @@ public class WishlistDAO {
     }
 
     public boolean removeFromWishlist(int tenantId, int propertyId) {
-        String sql = "DELETE FROM wishlist WHERE tenant_id = ? AND property_id = ?";
+        String sql = "DELETE FROM wishlists WHERE tenant_id = ? AND property_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -50,7 +50,7 @@ public class WishlistDAO {
     }
 
     public boolean isWishlisted(int tenantId, int propertyId) {
-        String sql = "SELECT 1 FROM wishlist WHERE tenant_id = ? AND property_id = ? LIMIT 1";
+        String sql = "SELECT 1 FROM wishlists WHERE tenant_id = ? AND property_id = ? LIMIT 1";
 
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -70,7 +70,7 @@ public class WishlistDAO {
     public List<Wishlist> getWishlistByTenant(int tenantId) {
         List<Wishlist> wishlistItems = new ArrayList<>();
         String sql = "SELECT w.wishlist_id, w.tenant_id, w.property_id, w.created_at, p.title, p.price "
-                + "FROM wishlist w "
+                + "FROM wishlists w "
                 + "JOIN properties p ON w.property_id = p.property_id "
                 + "WHERE w.tenant_id = ? "
                 + "ORDER BY w.created_at DESC";

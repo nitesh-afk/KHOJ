@@ -277,6 +277,15 @@
             flex-direction: column;
             gap: 8px;
             text-align: left;
+            min-width: 0; /* Prevents flex children from overflowing */
+        }
+        .range-inputs {
+            display: flex;
+            gap: 8px;
+        }
+        .range-inputs input {
+            width: 100%;
+            min-width: 0;
         }
         .filter-group label {
             font-size: 0.75rem;
@@ -479,6 +488,40 @@
             color: #6B6560;
             font-size: 0.9rem;
         }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 48px;
+            padding-bottom: 20px;
+        }
+        .pagination a {
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: #FFFFFF;
+            border: 1px solid #EDE9E3;
+            color: #1C1917;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .pagination a:hover {
+            border-color: #C9A96E;
+            background: #FAF9F6;
+        }
+        .pagination a.active {
+            background: #1C1917;
+            color: #C9A96E;
+            border-color: #1C1917;
+        }
+        .pagination .disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -522,9 +565,9 @@
             </div>
         </div>
 
-        <c:if test="${param.msg == 'applied'}">
-            <div class="banner-success">
-                <i class="fa-solid fa-check-circle"></i> Application securely submitted! You can track its status in 'My Applications'.
+        <c:if test="${param.msg == 'applied' || param.success == 'ApplicationSubmitted'}">
+            <div class="banner-success" style="background: rgba(216, 243, 220, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(183, 228, 199, 0.5); color: #2D6A4F;">
+                <i class="fa-solid fa-check-circle"></i> Application submitted successfully! You can track its status in 'My Applications'.
             </div>
         </c:if>
 
@@ -554,7 +597,7 @@
 
             <div class="filter-group">
                 <label>Price Range</label>
-                <div style="display: flex; gap: 5px;">
+                <div class="range-inputs">
                     <input type="number" name="minPrice" placeholder="Min" value="${param.minPrice}">
                     <input type="number" name="maxPrice" placeholder="Max" value="${param.maxPrice}">
                 </div>
@@ -596,36 +639,62 @@
             </h3>
         </div>
 
-        <div class="room-grid">
-            <c:forEach var="room" items="${properties}">
-                <a href="${pageContext.request.contextPath}/property-detail?id=${room.propertyId}" class="room-card">
-                    <div class="room-img-container">
-                        <img src="${not empty room.imageUrls ? room.imageUrls[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'}" class="room-img" alt="${room.title}">
-                        <span class="room-type-badge">
-                            ${room.propertyType}
-                        </span>
-                    </div>
-                    <div class="room-info">
-                        <div class="room-meta">
-                            <span class="verified-badge"><i class="fa-solid fa-check" style="color:#C9A96E;"></i> Verified</span>
-                            <span class="room-price">Rs. ${room.price} <small>/mo</small></span>
-                        </div>
-                        <h3 class="room-title">${room.title}</h3>
-                        <p class="room-location">
-                            <i class="fa-solid fa-location-dot"></i> ${room.neighborhoodName}, ${room.cityName}
-                        </p>
-                    </div>
-                </a>
-            </c:forEach>
-            
-            <c:if test="${empty properties}">
-                <div class="empty-state">
-                    <i class="fa-solid fa-building-circle-xmark"></i>
-                    <h3>No Premium Listings Found</h3>
-                    <p>We couldn't find any properties matching your current criteria. Please broaden your search.</p>
+        <c:choose>
+            <c:when test="${not empty properties}">
+                <div class="room-grid">
+                    <c:forEach var="room" items="${properties}">
+                        <a href="${pageContext.request.contextPath}/property-detail?id=${room.propertyId}" class="room-card">
+                            <div class="room-img-container">
+                                <img src="${not empty room.imageUrls ? room.imageUrls[0] : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80'}" class="room-img" alt="${room.title}">
+                                <span class="room-type-badge">
+                                    ${room.propertyType}
+                                </span>
+                            </div>
+                            <div class="room-info">
+                                <div class="room-meta">
+                                    <span class="verified-badge"><i class="fa-solid fa-check" style="color:#C9A96E;"></i> Verified</span>
+                                    <span class="room-price">Rs. ${room.price} <small>/mo</small></span>
+                                </div>
+                                <h3 class="room-title">${room.title}</h3>
+                                <p class="room-location">
+                                    <i class="fa-solid fa-location-dot"></i> ${room.neighborhoodName}, ${room.cityName}
+                                </p>
+                            </div>
+                        </a>
+                    </c:forEach>
                 </div>
-            </c:if>
-        </div>
+
+                <!-- Pagination Bar -->
+                <c:if test="${totalPages > 1}">
+                    <div class="pagination">
+                        <c:set var="queryParams" value="location=${searchLocation}&type=${searchType}&minPrice=${searchMinPrice}&maxPrice=${searchMaxPrice}&furnishing=${searchFurnishing}&bedrooms=${searchBedrooms}" />
+                        
+                        <a href="search?page=${currentPage - 1}&${queryParams}" class="${currentPage == 1 ? 'disabled' : ''}">
+                            <i class="fa-solid fa-chevron-left"></i> Previous
+                        </a>
+
+                        <c:forEach var="i" begin="1" end="${totalPages}">
+                            <a href="search?page=${i}&${queryParams}" class="${i == currentPage ? 'active' : ''}">${i}</a>
+                        </c:forEach>
+
+                        <a href="search?page=${currentPage + 1}&${queryParams}" class="${currentPage == totalPages ? 'disabled' : ''}">
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </c:if>
+            </c:when>
+            <c:otherwise>
+                <div class="empty-state" style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border: 1px dashed var(--accent-gold);">
+                    <i class="fa-solid fa-magnifying-glass-location" style="font-size: 4rem; color: var(--accent-gold); margin-bottom: 20px; display: block;"></i>
+                    <h3>No Matches Found</h3>
+                    <p style="margin-bottom: 24px;">We couldn't find any premium properties matching your exact filters.</p>
+                    <a href="${pageContext.request.contextPath}/search" class="btn-filter" style="text-decoration: none; display: inline-block; width: auto; padding: 12px 30px;">
+                        Clear All Filters
+                    </a>
+                </div>
+            </c:otherwise>
+        </c:choose>
+
     </div>
 
 </body>

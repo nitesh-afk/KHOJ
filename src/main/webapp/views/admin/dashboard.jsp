@@ -74,44 +74,64 @@
         <!-- Property Moderation Section -->
         <div class="section-wrapper">
             <div class="section-header">
-                <h2>Property Moderation Queue</h2>
+                <h2>Pending Property Verification</h2>
                 <div class="live-pill">
-                    <div class="live-dot"></div> Live
+                    <div class="live-dot" style="background: #f59e0b;"></div> Pending Review
                 </div>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Property</th>
-                        <th>Location</th>
+                        <th>Property Title</th>
+                        <th>Landlord</th>
                         <th>Price</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>Created On</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <c:forEach var="room" items="${rooms}">
+                    <c:forEach var="room" items="${pendingProperties}">
                         <tr>
-                            <td class="cell-bold">${room.title}</td>
-                            <td>${room.neighborhoodName}, ${room.cityName}</td>
-                            <td>Rs. ${room.price}</td>
                             <td>
-                                <span class="badge ${room.verified ? 'badge-success' : 'badge-warning'}">
-                                    ${room.verified ? 'PUBLIC' : 'HELD'}
-                                </span>
+                                <div class="cell-bold">${room.title}</div>
+                                <div class="cell-muted">${room.propertyType}</div>
                             </td>
+                            <td>${room.landlordName}</td>
+                            <td>Rs. ${room.price}</td>
+                            <td>${room.createdAt}</td>
                             <td>
-                                <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
-                                    <input type="hidden" name="action" value="approveRoom">
-                                    <input type="hidden" name="roomId" value="${room.propertyId}">
-                                    <input type="hidden" name="approve" value="${!room.verified}">
-                                    <button type="submit" class="btn ${room.verified ? 'btn-revoke' : 'btn-approve'}">
-                                        ${room.verified ? 'Revoke' : 'Approve'}
-                                    </button>
-                                </form>
+                                <div style="display: flex; gap: 8px;">
+                                    <form action="${pageContext.request.contextPath}/AdminServlet" method="post">
+                                        <input type="hidden" name="action" value="approveProperty">
+                                        <input type="hidden" name="propertyId" value="${room.propertyId}">
+                                        <button type="submit" class="btn btn-approve" style="background: #10b981; color: white;">
+                                            <i class="fa-solid fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    
+                                    <form action="${pageContext.request.contextPath}/AdminServlet" method="post">
+                                        <input type="hidden" name="action" value="rejectProperty">
+                                        <input type="hidden" name="propertyId" value="${room.propertyId}">
+                                        <button type="submit" class="btn btn-delete" style="background: #ef4444; color: white;" onclick="return confirm('Reject and Delete this property listing?')">
+                                            <i class="fa-solid fa-xmark"></i> Reject
+                                        </button>
+                                    </form>
+
+                                    <a href="${pageContext.request.contextPath}/property-detail?id=${room.propertyId}" class="btn" style="background: #6366f1; color: white; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 6px;">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     </c:forEach>
+                    <c:if test="${empty pendingProperties}">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="fa-solid fa-circle-check" style="font-size: 2rem; color: #10b981; margin-bottom: 10px; display: block;"></i>
+                                All properties are currently verified.
+                            </td>
+                        </tr>
+                    </c:if>
                 </tbody>
             </table>
         </div>

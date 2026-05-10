@@ -61,6 +61,21 @@ public class AdminDAO {
     }
 
     /**
+     * REJECT: Deletes the property entirely (triggering CASCADE for related data).
+     */
+    public boolean deleteProperty(int propertyId) {
+        String query = "DELETE FROM properties WHERE property_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, propertyId);
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Admin: Fetches all contact messages.
      */
     public java.util.List<com.khoj.model.Message> getAllMessages() {
@@ -342,6 +357,33 @@ public class AdminDAO {
                 try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
             }
         }
+    }
+
+    public List<com.khoj.model.Property> getUnverifiedProperties() {
+        List<com.khoj.model.Property> properties = new ArrayList<>();
+        String sql = "SELECT p.*, pt.type_name, u.full_name as landlord_name "
+                + "FROM properties p "
+                + "LEFT JOIN property_types pt ON p.type_id = pt.type_id " 
+                + "LEFT JOIN users u ON p.landlord_id = u.user_id "
+                + "WHERE p.is_verified = FALSE "
+                + "ORDER BY p.property_id DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                com.khoj.model.Property p = new com.khoj.model.Property();
+                p.setPropertyId(rs.getInt("property_id"));
+                p.setTitle(rs.getString("title"));
+                p.setPrice(rs.getDouble("price"));
+                p.setLandlordName(rs.getString("landlord_name"));
+                p.setPropertyType(rs.getString("type_name"));
+                p.setCreatedAt(rs.getString("created_at"));
+                p.setVerified(rs.getBoolean("is_verified"));
+                properties.add(p);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return properties;
     }
 
     public boolean deleteUser(int userId) {

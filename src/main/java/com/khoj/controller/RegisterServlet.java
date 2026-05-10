@@ -14,6 +14,12 @@ public class RegisterServlet extends HttpServlet {
     private final UserService userService = new UserService();
 
     @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/views/auth/register.jsp").forward(request, response);
+    }
+
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
@@ -25,17 +31,17 @@ public class RegisterServlet extends HttpServlet {
 
         // 2. Server-Side Validation (Audit Requirement)
         if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            response.sendRedirect("views/auth/register.jsp?error=invalid_email");
+            response.sendRedirect(request.getContextPath() + "/views/auth/register.jsp?error=invalid_email");
             return;
         }
         if (password == null || password.length() < 6) {
-            response.sendRedirect("views/auth/register.jsp?error=weak_password");
+            response.sendRedirect(request.getContextPath() + "/views/auth/register.jsp?error=weak_password");
             return;
         }
 
         // 3. Check if email already exists (Business Logic)
         if (userService.isEmailTaken(email)) {
-            response.sendRedirect("views/auth/register.jsp?error=email_taken");
+            response.sendRedirect(request.getContextPath() + "/views/auth/register.jsp?error=email_taken");
             return;
         }
 
@@ -46,13 +52,13 @@ public class RegisterServlet extends HttpServlet {
         try {
             boolean success = userService.registerUser(newUser);
             if (success) {
-                response.sendRedirect("views/auth/login.jsp?msg=success");
+                response.sendRedirect(request.getContextPath() + "/views/auth/login.jsp?msg=success");
             } else {
-                response.sendRedirect("views/auth/register.jsp?error=failed");
+                response.sendRedirect(request.getContextPath() + "/views/auth/register.jsp?error=failed");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("views/auth/register.jsp?error=exception");
+            response.sendRedirect(request.getContextPath() + "/views/auth/register.jsp?error=exception");
         }
     }
 }

@@ -19,6 +19,18 @@ public class AdminService {
         return adminDAO.verifyProperty(propertyId, verified);
     }
 
+    public List<com.khoj.model.Property> getPendingProperties() {
+        return adminDAO.getUnverifiedProperties();
+    }
+
+    public boolean approveProperty(int propertyId) {
+        return adminDAO.verifyProperty(propertyId, true);
+    }
+
+    public boolean rejectProperty(int propertyId) {
+        return adminDAO.deleteProperty(propertyId);
+    }
+
     public List<Map<String, Object>> getTopProperties(int limit) {
         return adminDAO.getTopProperties(limit);
     }

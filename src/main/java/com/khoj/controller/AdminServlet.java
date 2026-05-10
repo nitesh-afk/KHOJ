@@ -23,6 +23,13 @@ public class AdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        // Security Check
+        com.khoj.model.User user = (com.khoj.model.User) request.getSession().getAttribute("user");
+        if (user == null || !"ADMIN".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/LoginServlet?error=Unauthorized");
+            return;
+        }
+        
         String path = request.getServletPath();
 
         if ("/admin/rooms".equals(path)) {
@@ -76,6 +83,7 @@ public class AdminServlet extends HttpServlet {
         request.setAttribute("tenants", adminService.getTenants());
         request.setAttribute("landlords", adminService.getLandlords());
         request.setAttribute("rooms", propertyService.getAllProperties());
+        request.setAttribute("pendingProperties", adminService.getPendingProperties());
 
         request.getRequestDispatcher("/views/admin/dashboard.jsp").forward(request, response);
     }
@@ -84,6 +92,13 @@ public class AdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        // Security Check
+        com.khoj.model.User user = (com.khoj.model.User) request.getSession().getAttribute("user");
+        if (user == null || !"ADMIN".equalsIgnoreCase(user.getRole())) {
+            response.sendRedirect(request.getContextPath() + "/LoginServlet?error=Unauthorized");
+            return;
+        }
+
         String action = request.getParameter("action");
         if (action == null) return;
 
@@ -106,11 +121,15 @@ public class AdminServlet extends HttpServlet {
 
             case "verifyProperty":
             case "approveRoom":
+            case "approveProperty":
                 int propertyId = Integer.parseInt(request.getParameter("propertyId") != null ? 
                                     request.getParameter("propertyId") : request.getParameter("roomId"));
-                boolean verify = Boolean.parseBoolean(request.getParameter("verify") != null ? 
-                                    request.getParameter("verify") : request.getParameter("approve"));
-                adminService.verifyProperty(propertyId, verify);
+                adminService.approveProperty(propertyId);
+                break;
+
+            case "rejectProperty":
+                int rejectPropId = Integer.parseInt(request.getParameter("propertyId"));
+                adminService.rejectProperty(rejectPropId);
                 break;
                 
             case "approveLandlord":

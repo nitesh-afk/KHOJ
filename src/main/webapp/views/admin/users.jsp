@@ -305,9 +305,9 @@
                 </div>
             </div>
             <ul class="nav-links">
-                <li><a href="${pageContext.request.contextPath}/AdminServlet"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/users" class="active"><i class="fa-solid fa-users"></i> User Governance</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/property-verification"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/user-approval" class="active"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
             </ul>
         </div>
@@ -365,7 +365,7 @@
                                     </td>
                                     <td>
                                         <c:if test="${user.role == 'LANDLORD' && user.status != 'VERIFIED'}">
-                                            <form action="${pageContext.request.contextPath}/AdminServlet" method="post" style="display: inline;">
+                                            <form action="${pageContext.request.contextPath}/admin/update-user-status" method="post" style="display: inline;">
                                                 <input type="hidden" name="action" value="verifyLandlord">
                                                 <input type="hidden" name="userId" value="${user.id}">
                                                 <button type="submit" class="btn btn-verify">Verify</button>

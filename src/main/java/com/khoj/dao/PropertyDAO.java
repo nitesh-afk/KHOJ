@@ -22,7 +22,7 @@ public class PropertyDAO {
      * Query 1: Fetches a single property by ID with all relational data joined.
      */
     public Property getPropertyById(int propertyId) {
-        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
+        String sql = "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name, u.email as landlord_email, u.phone_number as landlord_phone "
                 +
                 "FROM properties p " +
                 "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " +
@@ -39,7 +39,7 @@ public class PropertyDAO {
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     Property property = extractPropertyFromResultSet(rs);
-                    property.setAmenities(getAmenitiesForProperty(propertyId));
+                    property.setDetailedAmenities(getPropertyAmenities(propertyId));
                     property.setImageUrls(getImagesForProperty(propertyId));
                     return property;
                 }
@@ -51,28 +51,53 @@ public class PropertyDAO {
     }
 
     /**
-     * Query 2: Fetches amenities for a specific property.
+     * PRECISION: Fetch detailed Amenity objects with icons.
      */
-    public List<String> getAmenitiesForProperty(int propertyId) {
-        List<String> amenities = new ArrayList<>();
-        String sql = "SELECT a.amenity_name " +
-                "FROM property_amenities pa " +
-                "JOIN amenities a ON pa.amenity_id = a.amenity_id " +
-                "WHERE pa.property_id = ?";
-
+    public List<Amenity> getPropertyAmenities(int propertyId) {
+        List<Amenity> amenities = new ArrayList<>();
+        String sql = "SELECT a.* FROM property_amenities pa " +
+                     "JOIN amenities a ON pa.amenity_id = a.amenity_id " +
+                     "WHERE pa.property_id = ?";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
-
+             PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, propertyId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
-                    amenities.add(rs.getString("amenity_name"));
+                    amenities.add(new Amenity(
+                        rs.getInt("amenity_id"),
+                        rs.getString("amenity_name"),
+                        rs.getString("icon_code")
+                    ));
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
         return amenities;
+    }
+
+    /**
+     * REVIEWS: Fetch all reviews for a property with tenant names.
+     */
+    public List<Review> getPropertyReviews(int propertyId) {
+        List<Review> reviews = new ArrayList<>();
+        String sql = "SELECT r.*, u.full_name as tenant_name FROM reviews r " +
+                     "JOIN users u ON r.tenant_id = u.user_id " +
+                     "WHERE r.property_id = ? ORDER BY r.created_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, propertyId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    Review r = new Review();
+                    r.setReviewId(rs.getInt("review_id"));
+                    r.setRating(rs.getInt("rating"));
+                    r.setComment(rs.getString("comment"));
+                    r.setCreatedAt(rs.getString("created_at"));
+                    r.setTenantName(rs.getString("tenant_name"));
+                    reviews.add(r);
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return reviews;
     }
 
     /**
@@ -154,6 +179,8 @@ public class PropertyDAO {
         property.setThemeName(rs.getString("theme_name"));
         property.setPropertyType(rs.getString("type_name"));
         property.setLandlordName(rs.getString("landlord_name"));
+        property.setLandlordEmail(rs.getString("landlord_email"));
+        property.setLandlordPhone(rs.getString("landlord_phone"));
 
         return property;
     }
@@ -162,7 +189,8 @@ public class PropertyDAO {
      * Advanced Search: Fetches properties based on location, type, and price model.
      */
     public List<Property> searchProperties(String location, String type, String priceModel, 
-                                          Double minPrice, Double maxPrice, String furnishing, Integer bedrooms) {
+                                          Double minPrice, Double maxPrice, String furnishing, 
+                                          Integer bedrooms, int limit, int offset) {
         List<Property> properties = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 "SELECT p.*, n.neighborhood_name, c.city_name, dt.theme_name, pt.type_name, u.full_name as landlord_name "
@@ -189,6 +217,8 @@ public class PropertyDAO {
         if (bedrooms != null && bedrooms > 0)
             sql.append("AND p.bedrooms = ? ");
 
+        sql.append("ORDER BY p.property_id DESC LIMIT ? OFFSET ?");
+
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pst = conn.prepareStatement(sql.toString())) {
 
@@ -210,6 +240,9 @@ public class PropertyDAO {
                 pst.setString(paramIndex++, furnishing);
             if (bedrooms != null && bedrooms > 0)
                 pst.setInt(paramIndex++, bedrooms);
+            
+            pst.setInt(paramIndex++, limit);
+            pst.setInt(paramIndex++, offset);
 
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
@@ -635,5 +668,68 @@ public class PropertyDAO {
             if (rs.next()) return rs.getInt(1);
         } catch (Exception e) {}
         return 1; 
+    }
+
+    public int getSearchTotalCount(String location, String type, String priceModel, 
+                                   Double minPrice, Double maxPrice, String furnishing, Integer bedrooms) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM properties p " 
+                        + "LEFT JOIN neighborhoods n ON p.neighborhood_id = n.neighborhood_id " 
+                        + "LEFT JOIN cities c ON n.city_id = c.city_id " 
+                        + "LEFT JOIN property_types pt ON p.type_id = pt.type_id " 
+                        + "WHERE p.is_verified = TRUE ");
+
+        if (location != null && !location.isEmpty())
+            sql.append("AND (c.city_name LIKE ? OR n.neighborhood_name LIKE ?) ");
+        if (type != null && !type.isEmpty())
+            sql.append("AND pt.type_name = ? ");
+        if (priceModel != null && !priceModel.isEmpty())
+            sql.append("AND p.price_model = ? ");
+        if (minPrice != null)
+            sql.append("AND p.price >= ? ");
+        if (maxPrice != null)
+            sql.append("AND p.price <= ? ");
+        if (furnishing != null && !furnishing.isEmpty())
+            sql.append("AND p.furnishing_status = ? ");
+        if (bedrooms != null && bedrooms > 0)
+            sql.append("AND p.bedrooms = ? ");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql.toString())) {
+
+            int paramIndex = 1;
+            if (location != null && !location.isEmpty()) {
+                String locPattern = "%" + location + "%";
+                pst.setString(paramIndex++, locPattern);
+                pst.setString(paramIndex++, locPattern);
+            }
+            if (type != null && !type.isEmpty())
+                pst.setString(paramIndex++, type);
+            if (priceModel != null && !priceModel.isEmpty())
+                pst.setString(paramIndex++, priceModel);
+            if (minPrice != null)
+                pst.setDouble(paramIndex++, minPrice);
+            if (maxPrice != null)
+                pst.setDouble(paramIndex++, maxPrice);
+            if (furnishing != null && !furnishing.isEmpty())
+                pst.setString(paramIndex++, furnishing);
+            if (bedrooms != null && bedrooms > 0)
+                pst.setInt(paramIndex++, bedrooms);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    public int getTotalVerifiedCount() {
+        String sql = "SELECT COUNT(*) FROM properties WHERE is_verified = TRUE";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql);
+             ResultSet rs = pst.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0;
     }
 }

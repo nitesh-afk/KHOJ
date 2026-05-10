@@ -24,10 +24,10 @@ public class HomeServlet extends HttpServlet {
             String role = user.getRole();
             
             if ("ADMIN".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/AdminServlet");
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
                 return;
             } else if ("LANDLORD".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/LandlordDashboard");
+                response.sendRedirect(request.getContextPath() + "/landlord/dashboard");
                 return;
             }
             // TENANTs fall through to the public discovery feed below

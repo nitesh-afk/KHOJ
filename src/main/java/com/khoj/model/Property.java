@@ -28,16 +28,20 @@ public class Property {
     private String themeName;
     private String propertyType;
     private String landlordName;
+    private String landlordEmail;
+    private String landlordPhone;
 
     // 1-to-Many Relational Data
     private List<String> amenities;
     private List<String> imageUrls;
+    private List<Amenity> detailedAmenities;
 
     // --- Constructors ---
     
     public Property() {
         this.amenities = new ArrayList<>();
         this.imageUrls = new ArrayList<>();
+        this.detailedAmenities = new ArrayList<>();
     }
 
     public Property(int propertyId, int landlordId, String title, String description, 
@@ -121,6 +125,15 @@ public class Property {
 
     public List<String> getImageUrls() { return imageUrls; }
     public void setImageUrls(List<String> imageUrls) { this.imageUrls = imageUrls; }
+
+    public List<Amenity> getDetailedAmenities() { return detailedAmenities; }
+    public void setDetailedAmenities(List<Amenity> detailedAmenities) { this.detailedAmenities = detailedAmenities; }
+
+    public String getLandlordEmail() { return landlordEmail; }
+    public void setLandlordEmail(String landlordEmail) { this.landlordEmail = landlordEmail; }
+
+    public String getLandlordPhone() { return landlordPhone; }
+    public void setLandlordPhone(String landlordPhone) { this.landlordPhone = landlordPhone; }
 
     // Helper methods
     public void addAmenity(String amenity) { this.amenities.add(amenity); }

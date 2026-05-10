@@ -11,13 +11,13 @@
                 <c:when test="${not empty sessionScope.user}">
                     <c:choose>
                         <c:when test="${sessionScope.user.role == 'ADMIN'}">
-                            <a href="${pageContext.request.contextPath}/AdminServlet" class="nav-link btn-premium">Dashboard</a>
+                            <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link btn-premium">Admin Dash</a>
                         </c:when>
                         <c:when test="${sessionScope.user.role == 'LANDLORD'}">
-                            <a href="${pageContext.request.contextPath}/LandlordDashboard" class="nav-link btn-premium">Dashboard</a>
+                            <a href="${pageContext.request.contextPath}/landlord/dashboard" class="nav-link btn-premium">Host Portal</a>
                         </c:when>
                         <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/search" class="nav-link btn-premium">Dashboard</a>
+                            <a href="${pageContext.request.contextPath}/tenant/dashboard" class="nav-link btn-premium">My Journey</a>
                         </c:otherwise>
                     </c:choose>
                     <a href="${pageContext.request.contextPath}/LogoutServlet" class="nav-link" style="opacity: 0.7;">Logout</a>

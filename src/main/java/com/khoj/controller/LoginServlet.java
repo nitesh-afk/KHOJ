@@ -17,7 +17,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        request.getRequestDispatcher("views/auth/login.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/auth/login.jsp").forward(request, response);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class LoginServlet extends HttpServlet {
         if (user != null) {
             // 1. Status Check (RBAC requirement)
             if (!"ACTIVE".equalsIgnoreCase(user.getStatus())) {
-                response.sendRedirect("views/auth/login.jsp?error=account_deactivated");
+                response.sendRedirect(request.getContextPath() + "/views/auth/login.jsp?error=account_deactivated");
                 return;
             }
 
@@ -43,17 +43,14 @@ public class LoginServlet extends HttpServlet {
             // 3. Unified Routing (TENANTS go to the Premium Home Page)
             String role = user.getRole();
             if ("ADMIN".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/AdminServlet");
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else if ("LANDLORD".equalsIgnoreCase(role)) {
-                response.sendRedirect(request.getContextPath() + "/LandlordDashboard");
-            } else if ("TENANT".equalsIgnoreCase(role)) {
-                // Point to the servlet that fetches property discovery data
-                response.sendRedirect(request.getContextPath() + "/search");
+                response.sendRedirect(request.getContextPath() + "/landlord/dashboard");
             } else {
-                response.sendRedirect("search");
+                response.sendRedirect(request.getContextPath() + "/tenant/dashboard");
             }
         } else {
-            response.sendRedirect("views/auth/login.jsp?error=invalid");
+            response.sendRedirect(request.getContextPath() + "/views/auth/login.jsp?error=invalid");
         }
     }
 }

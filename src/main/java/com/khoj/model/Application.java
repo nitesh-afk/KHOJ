@@ -12,6 +12,7 @@ public class Application {
     private String landlordName;
     private String landlordEmail;
     private String propertyTitle;
+    private String appliedAt;
 
     public Application() {}
 
@@ -42,4 +43,7 @@ public class Application {
 
     public String getPropertyTitle() { return propertyTitle; }
     public void setPropertyTitle(String propertyTitle) { this.propertyTitle = propertyTitle; }
+
+    public String getAppliedAt() { return appliedAt; }
+    public void setAppliedAt(String appliedAt) { this.appliedAt = appliedAt; }
 }

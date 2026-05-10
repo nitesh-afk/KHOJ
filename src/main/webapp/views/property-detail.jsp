@@ -130,13 +130,17 @@
                 <h3>Description</h3>
                 <p style="line-height: 1.6; color: #444; font-size: 1.05rem;">${property.description}</p>
                 
-                <h3 style="margin-top: 40px;">Amenities</h3>
+                <h3 style="margin-top: 40px;">Amenities & Perks</h3>
                 <div class="amenity-list">
-                    <c:forEach items="${property.amenities}" var="amenity">
+                    <c:forEach items="${property.detailedAmenities}" var="amenity">
                         <div class="amenity-item">
-                            <i class="fa-solid fa-check" style="color: var(--accent-gold);"></i> ${amenity}
+                            <i class="fa-solid ${not empty amenity.iconCode ? amenity.iconCode : 'fa-circle-check'}" style="color: var(--accent-gold); width: 20px;"></i> 
+                            ${amenity.name}
                         </div>
                     </c:forEach>
+                    <c:if test="${empty property.detailedAmenities}">
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Standard amenities included.</p>
+                    </c:if>
                 </div>
             </div>
         </div>
@@ -146,8 +150,10 @@
                 <p style="font-weight: 700; margin-bottom: 5px;">Price</p>
                 <div class="price-tag">Rs. ${property.price} <span style="font-size: 1rem; color: var(--text-secondary); font-weight: 500;">/ ${property.priceModel}</span></div>
                 
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.8;">
                     <strong>Landlord:</strong> ${property.landlordName}<br>
+                    <strong>Contact:</strong> ${property.landlordPhone}<br>
+                    <strong>Email:</strong> ${property.landlordEmail}<br>
                     <strong>Bedrooms:</strong> ${property.bedrooms}<br>
                     <strong>Status:</strong> ${property.furnishingStatus}
                 </p>
@@ -168,25 +174,57 @@
                     </form>
                 </c:if>
 
-                <form action="${pageContext.request.contextPath}/ApplyServlet" method="POST">
-                    <input type="hidden" name="propertyId" value="${property.propertyId}">
-                    <button type="submit" class="btn-apply">Check Availability</button>
-                </form>
+                <c:choose>
+                    <c:when test="${hasApplied}">
+                        <div style="background: rgba(201, 169, 110, 0.1); backdrop-filter: blur(8px); border: 1px solid rgba(201, 169, 110, 0.3); color: var(--accent-gold-dark); padding: 15px; border-radius: 8px; text-align: center; font-weight: 700; margin-bottom: 10px;">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Application Pending
+                        </div>
+                        <a href="${pageContext.request.contextPath}/messages?with=${property.landlordId}&property=${property.propertyId}" 
+                           style="display: block; text-align: center; background: #FFF; color: var(--nav-bg); border: 1px solid var(--nav-bg); padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-bottom: 10px;">
+                           <i class="fa-solid fa-message"></i> Message Landlord
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <form action="${pageContext.request.contextPath}/ApplyServlet" method="POST">
+                            <input type="hidden" name="propertyId" value="${property.propertyId}">
+                            <button type="submit" class="btn-apply">Check Availability</button>
+                        </form>
+                    </c:otherwise>
+                </c:choose>
                 
-                <p style="font-size: 0.8rem; color: #888; text-align: center; margin-top: 15px;">
-                    <i class="fa-solid fa-shield-halved"></i> Secure Payment & Data Protection
-                </p>
+                <c:if test="${param.error == 'AlreadyApplied'}">
+                    <div style="background: rgba(255, 251, 235, 0.7); backdrop-filter: blur(10px); color: #92400e; border: 1px solid rgba(252, 211, 77, 0.5); padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: 600; font-size: 0.85rem;">
+                        <i class="fa-solid fa-circle-info"></i> You have already applied for this property.
+                    </div>
+                </c:if>
+                <c:if test="${param.error == 'SystemBusy'}">
+                    <div style="background: rgba(254, 242, 242, 0.7); backdrop-filter: blur(10px); color: #991b1b; border: 1px solid rgba(254, 202, 202, 0.5); padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: 600; font-size: 0.85rem;">
+                        <i class="fa-solid fa-circle-exclamation"></i> System busy. Please try again later.
+                    </div>
+                </c:if>
             </div>
         </div>
     </div>
 
     <div class="reviews-section">
         <div class="review-summary">
-            <h2 style="margin-bottom: 6px;">Reviews</h2>
+            <h2 style="margin-bottom: 6px;">Guest Reviews</h2>
             <p style="color:#444;">
-                Average rating:
-                <strong><fmt:formatNumber value="${avgRating}" maxFractionDigits="1" minFractionDigits="1" /></strong>
-                (${reviews.size()} reviews)
+                <c:choose>
+                    <c:when test="${not empty reviews}">
+                        Average rating:
+                        <strong><fmt:formatNumber value="${avgRating}" maxFractionDigits="1" minFractionDigits="1" /></strong>
+                        <span style="color:#f59e0b; margin: 0 5px;">
+                            <c:forEach begin="1" end="5" var="i">
+                                <i class="fa-solid fa-star${i <= avgRating ? '' : '-o'}" style="color: ${i <= avgRating ? '#f59e0b' : '#ddd'}"></i>
+                            </c:forEach>
+                        </span>
+                        (${reviews.size()} verified reviews)
+                    </c:when>
+                    <c:otherwise>
+                        No ratings yet for this property.
+                    </c:otherwise>
+                </c:choose>
             </p>
         </div>
 

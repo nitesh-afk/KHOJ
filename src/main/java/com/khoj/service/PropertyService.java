@@ -22,8 +22,14 @@ public class PropertyService {
     }
 
     public List<Property> searchProperties(String location, String type, String priceModel,
-                                          Double minPrice, Double maxPrice, String furnishing, Integer bedrooms) {
-        return propertyDAO.searchProperties(location, type, priceModel, minPrice, maxPrice, furnishing, bedrooms);
+                                          Double minPrice, Double maxPrice, String furnishing, 
+                                          Integer bedrooms, int limit, int offset) {
+        return propertyDAO.searchProperties(location, type, priceModel, minPrice, maxPrice, furnishing, bedrooms, limit, offset);
+    }
+
+    public int getSearchTotalCount(String location, String type, String priceModel,
+                                   Double minPrice, Double maxPrice, String furnishing, Integer bedrooms) {
+        return propertyDAO.getSearchTotalCount(location, type, priceModel, minPrice, maxPrice, furnishing, bedrooms);
     }
 
     public List<Property> getPropertiesByLandlord(int landlordId) {
