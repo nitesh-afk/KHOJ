@@ -7,8 +7,8 @@ import java.sql.PreparedStatement;
 
 public class ContactDAO {
 
-    public boolean saveInquiry(String name, String email, String subject, String message) {
-        String query = "INSERT INTO contact_inquiries (full_name, email, subject, message) VALUES (?, ?, ?, ?)";
+    public boolean saveMessage(String name, String email, String subject, String message) {
+        String query = "INSERT INTO contact_messages (full_name, email, subject, message) VALUES (?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
             pst.setString(1, name);

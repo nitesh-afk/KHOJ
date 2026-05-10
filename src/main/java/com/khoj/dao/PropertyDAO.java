@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
+import com.khoj.model.Amenity;
 import com.khoj.model.Property;
 import com.khoj.model.PropertyType;
+import com.khoj.model.Review;
 import com.khoj.model.Theme;
 import com.khoj.util.DBConnection;
 
@@ -68,6 +69,26 @@ public class PropertyDAO {
                         rs.getString("amenity_name"),
                         rs.getString("icon_code")
                     ));
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return amenities;
+    }
+
+    /**
+     * PRECISION: Fetch simple string list of amenities.
+     */
+    public List<String> getAmenitiesForProperty(int propertyId) {
+        List<String> amenities = new ArrayList<>();
+        String sql = "SELECT a.amenity_name FROM property_amenities pa " +
+                     "JOIN amenities a ON pa.amenity_id = a.amenity_id " +
+                     "WHERE pa.property_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setInt(1, propertyId);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    amenities.add(rs.getString("amenity_name"));
                 }
             }
         } catch (SQLException e) { e.printStackTrace(); }

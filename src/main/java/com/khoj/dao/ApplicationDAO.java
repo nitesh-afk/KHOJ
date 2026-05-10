@@ -1,6 +1,6 @@
 package com.khoj.dao;
 
-import com.khoj.model.ApplicationStatus;
+import com.khoj.model.Application;
 import com.khoj.util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -52,7 +52,7 @@ public class ApplicationDAO {
     /**
      * LANDLORD VIEW: Fetch students who applied for my rooms.
      */
-    public List<Application> getLandlordApplications(int landlordId) {
+    public List<Application> getApplicationsByLandlord(int landlordId) {
         List<Application> apps = new ArrayList<>();
         String query = "SELECT a.*, u.full_name AS tenant_name, u.email AS tenant_email, p.title AS property_title " +
                        "FROM applications a " +
@@ -69,7 +69,7 @@ public class ApplicationDAO {
                     apps.add(mapResultSetToApplication(rs, "tenant_name", "tenant_email", null, null));
                 }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (Exception e) { e.printStackTrace(); }
         return apps;
     }
 
@@ -95,6 +95,22 @@ public class ApplicationDAO {
             }
         } catch (Exception e) { e.printStackTrace(); }
         return apps;
+    }
+
+    /**
+     * SIMPLE UPDATE: Updates status without landlord verification (Use with caution).
+     */
+    public boolean updateApplicationStatus(int appId, String status) {
+        String query = "UPDATE applications SET status = ? WHERE app_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setString(1, status);
+            pst.setInt(2, appId);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
@@ -139,7 +155,7 @@ public class ApplicationDAO {
         }
     }
 
-    private Application mapResultSetToApplication(ResultSet rs, String tName, String tEmail, String lName, String lEmail) throws Exception {
+    private Application mapResultSetToApplication(ResultSet rs, String tName, String tEmail, String lName, String lEmail) throws SQLException {
         Application app = new Application();
         app.setAppId(rs.getInt("app_id"));
         app.setTenantId(rs.getInt("tenant_id"));

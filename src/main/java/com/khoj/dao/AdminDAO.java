@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.khoj.model.ContactMessage;
 import com.khoj.model.User;
 import com.khoj.util.DBConnection;
 
@@ -78,15 +79,15 @@ public class AdminDAO {
     /**
      * Admin: Fetches all contact messages.
      */
-    public java.util.List<com.khoj.model.Message> getAllMessages() {
-        java.util.List<com.khoj.model.Message> messages = new java.util.ArrayList<>();
+    public java.util.List<ContactMessage> getAllMessages() {
+        java.util.List<ContactMessage> messages = new java.util.ArrayList<>();
         String query = "SELECT * FROM contact_messages ORDER BY message_id DESC";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query);
              ResultSet rs = pst.executeQuery()) {
 
             while (rs.next()) {
-                com.khoj.model.Message msg = new com.khoj.model.Message();
+                ContactMessage msg = new ContactMessage();
                 msg.setId(rs.getInt("message_id"));
                 msg.setFullName(rs.getString("full_name"));
                 msg.setEmail(rs.getString("email"));
@@ -122,14 +123,14 @@ public class AdminDAO {
     /**
      * Admin: Fetches a single message by ID.
      */
-    public com.khoj.model.Message getMessageById(int messageId) {
+    public ContactMessage getMessageById(int messageId) {
         String query = "SELECT * FROM contact_messages WHERE message_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pst = conn.prepareStatement(query)) {
             pst.setInt(1, messageId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    com.khoj.model.Message msg = new com.khoj.model.Message();
+                    ContactMessage msg = new ContactMessage();
                     msg.setId(rs.getInt("message_id"));
                     msg.setFullName(rs.getString("full_name"));
                     msg.setEmail(rs.getString("email"));

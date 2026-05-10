@@ -11,7 +11,12 @@ public class ApplicationService {
     private final ApplicationDAO applicationDAO = new ApplicationDAO();
 
     public boolean applyForProperty(int tenantId, int propertyId) {
-        return applicationDAO.applyForProperty(tenantId, propertyId);
+        try {
+            return applicationDAO.applyForProperty(tenantId, propertyId) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public List<Application> getApplicationsByLandlord(int landlordId) {

@@ -3,6 +3,7 @@ package com.khoj.controller;
 import java.io.IOException;
 import java.util.Map;
 
+import com.khoj.model.ContactMessage;
 import com.khoj.service.AdminService;
 import com.khoj.service.PropertyService;
 import com.khoj.service.UserService;
@@ -59,7 +60,7 @@ public class AdminServlet extends HttpServlet {
             adminDAO.markAsReadIfNew(messageId);
 
             // 2. Fetch the full message object
-            com.khoj.model.Message message = adminDAO.getMessageById(messageId);
+            ContactMessage message = adminDAO.getMessageById(messageId);
             request.setAttribute("message", message);
 
             request.getRequestDispatcher("/views/admin/message-detail.jsp").forward(request, response);

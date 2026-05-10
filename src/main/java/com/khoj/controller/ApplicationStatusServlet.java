@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.sql.SQLException;
 
 @WebServlet("/landlord/update-application")
 public class ApplicationStatusServlet extends HttpServlet {
@@ -35,7 +36,7 @@ public class ApplicationStatusServlet extends HttpServlet {
         if (appIdStr != null && status != null) {
             try {
                 int appId = Integer.parseInt(appIdStr);
-                boolean success = applicationDAO.updateApplicationStatus(appId, status);
+                boolean success = applicationDAO.updateApplicationStatusPrecise(appId, status, user.getId());
 
                 if (success) {
                     // Phase 5: Notification Bridge
@@ -54,8 +55,8 @@ public class ApplicationStatusServlet extends HttpServlet {
                 } else {
                     response.sendRedirect(request.getContextPath() + "/landlord/inbound-applications?error=UpdateFailed");
                 }
-            } catch (NumberFormatException e) {
-                response.sendRedirect(request.getContextPath() + "/landlord/dashboard?error=InvalidId");
+            } catch (NumberFormatException | SQLException e) {
+                response.sendRedirect(request.getContextPath() + "/landlord/dashboard?error=InvalidData");
             }
         } else {
             response.sendRedirect(request.getContextPath() + "/landlord/dashboard");

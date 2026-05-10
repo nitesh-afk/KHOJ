@@ -1,5 +1,6 @@
 package com.khoj.controller;
 
+import com.khoj.dao.ContactDAO;
 import com.khoj.util.SecurityUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -31,8 +32,8 @@ public class ContactServlet extends HttpServlet {
         String safeMessage = SecurityUtil.sanitizeHTML(rawMessage);
 
         // Persist to Database
-        com.khoj.dao.MessageDAO messageDAO = new com.khoj.dao.MessageDAO();
-        boolean isSaved = messageDAO.saveMessage(fullName, email, subject, safeMessage);
+        ContactDAO contactDAO = new ContactDAO();
+        boolean isSaved = contactDAO.saveMessage(fullName, email, subject, safeMessage);
 
         if (isSaved) {
             request.setAttribute("successMsg", "Thank you, " + fullName + "! Your message has been safely received and our team will reach out soon.");
