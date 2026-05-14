@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet({"/admin/dashboard", "/landlord/dashboard", "/tenant/dashboard", "/tenant/applications", "/admin/property-verification", "/admin/user-approval", "/landlord/inbound-applications", "/admin/messages", "/admin/message-detail", "/admin/analytics", "/ViewApplications"})
+@WebServlet({"/admin/dashboard", "/admin/rooms", "/admin/users", "/landlord/dashboard", "/tenant/dashboard", "/tenant/applications", "/admin/property-verification", "/admin/user-approval", "/landlord/inbound-applications", "/admin/messages", "/admin/message-detail", "/admin/analytics", "/ViewApplications"})
 public class MainController extends HttpServlet {
 
     @Override
@@ -20,16 +20,22 @@ public class MainController extends HttpServlet {
             case "/admin/dashboard":
                 com.khoj.dao.AdminDAO adminDAO = new com.khoj.dao.AdminDAO();
                 request.setAttribute("stats", adminDAO.getSystemSummary());
+                request.setAttribute("pendingProperties", adminDAO.getUnverifiedProperties());
+                request.setAttribute("tenants", adminDAO.getUsersByRole("TENANT"));
+                request.setAttribute("landlords", adminDAO.getUsersByRole("LANDLORD"));
                 request.getRequestDispatcher("/views/admin/dashboard.jsp").forward(request, response);
                 break;
+            case "/admin/rooms":
             case "/admin/property-verification":
                 com.khoj.dao.AdminDAO adminDAOVerify = new com.khoj.dao.AdminDAO();
                 request.setAttribute("rooms", adminDAOVerify.getUnverifiedProperties());
                 request.getRequestDispatcher("/views/admin/rooms.jsp").forward(request, response);
                 break;
+            case "/admin/users":
             case "/admin/user-approval":
                 com.khoj.dao.AdminDAO adminDAOUsers = new com.khoj.dao.AdminDAO();
-                request.setAttribute("landlords", adminDAOUsers.getPendingLandlords());
+                request.setAttribute("users", adminDAOUsers.getUsersForGovernance());
+                request.setAttribute("pendingTenants", adminDAOUsers.getPendingTenants());
                 request.getRequestDispatcher("/views/admin/users.jsp").forward(request, response);
                 break;
             case "/admin/messages":

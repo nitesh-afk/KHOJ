@@ -613,7 +613,7 @@
                     <c:when test="${not empty sessionScope.user}">
                         <c:choose>
                             <c:when test="${sessionScope.user.role == 'ADMIN'}">
-                                <a href="${pageContext.request.contextPath}/AdminServlet" class="nav-link">Admin Panel</a>
+                                <a href="${pageContext.request.contextPath}/admin/dashboard" class="nav-link">Admin Panel</a>
                             </c:when>
                             <c:when test="${sessionScope.user.role == 'LANDLORD'}">
                                 <a href="${pageContext.request.contextPath}/landlord/dashboard" class="nav-link">Landlord Panel</a>

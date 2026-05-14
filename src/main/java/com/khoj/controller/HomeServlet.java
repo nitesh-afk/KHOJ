@@ -39,7 +39,7 @@ public class HomeServlet extends HttpServlet {
         request.setAttribute("propertyTypes", propertyService.getAllPropertyTypes());
         request.setAttribute("properties", propertyService.getAllProperties());
 
-        // 3. Forward to the refactored landing page
-        request.getRequestDispatcher("/views/home.jsp").forward(request, response);
+        // 3. Forward to the new premium landing page
+        request.getRequestDispatcher("/landing.jsp").forward(request, response);
     }
 }

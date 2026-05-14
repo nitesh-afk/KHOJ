@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,18 +93,21 @@
                 <div class="logo-subtitle">Admin Control</div>
             </div>
             <hr class="sidebar-divider">
-            <div class="superuser-badge">
-                <div class="superuser-avatar">A</div>
-                <div class="superuser-info">
-                    <span class="superuser-name">System Admin</span>
-                    <span class="superuser-role">SUPERUSER</span>
+            <a href="${pageContext.request.contextPath}/profile" class="profile-link" style="text-decoration: none; color: inherit; display: block;">
+                <div class="superuser-badge">
+                    <div class="superuser-avatar">${empty sessionScope.user.fullName ? '?' : fn:substring(sessionScope.user.fullName, 0, 1)}</div>
+                    <div class="superuser-info">
+                        <span class="superuser-name">${sessionScope.user.fullName}</span>
+                        <span class="superuser-role">SUPERUSER</span>
+                    </div>
                 </div>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/users"><i class="fa-solid fa-users"></i> User Governance</a></li>
                 <li><a href="${pageContext.request.contextPath}/admin/messages" class="active"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/analytics"><i class="fa-solid fa-chart-bar"></i> Analytics</a></li>
                 <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
             </ul>
         </div>

@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -242,32 +243,58 @@
             <h2>Welcome Back</h2>
             <p class="auth-subtitle">Log in to manage your bookings and explore premium properties across Nepal.</p>
             
-            <% if ("invalid".equals(request.getParameter("error"))) { %>
+            <c:if test="${param.error == 'invalid'}">
                 <div class="alert alert-error">
                     <i class="fa-solid fa-circle-exclamation"></i> Invalid email or password.
                 </div>
-            <% } %>
-            
-            <% if ("success".equals(request.getParameter("msg"))) { %>
-                <div class="alert alert-success">
-                    <i class="fa-solid fa-circle-check"></i> Registration successful! Please log in.
+            </c:if>
+            <c:if test="${param.error == 'pending_approval'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Your tenant account is waiting for administrator approval. You will be able to sign in once it is activated.
                 </div>
-            <% } %>
+            </c:if>
+            <c:if test="${param.error == 'account_deactivated'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> This account is not active. Please contact support if you believe this is a mistake.
+                </div>
+            </c:if>
+            <c:if test="${param.error == 'session_expired'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Your session has expired. Please sign in again.
+                </div>
+            </c:if>
+            
+            <c:if test="${param.msg == 'success'}">
+                <div class="alert alert-success">
+                    <i class="fa-solid fa-circle-check"></i> Registration successful! Tenant accounts require admin approval before first login.
+                </div>
+            </c:if>
+
+            <c:if test="${param.msg == 'logged_out'}">
+                <div class="alert alert-success">
+                    <i class="fa-solid fa-circle-check"></i> You have been signed out.
+                </div>
+            </c:if>
 
             <form action="${pageContext.request.contextPath}/LoginServlet" method="post">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                    <input type="email" id="email" name="email" placeholder="john@example.com" required
+                           value="<c:out value='${prefillEmail}'/>">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="••••••••" required>
                 </div>
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <input type="checkbox" id="rememberMe" name="rememberMe" value="on" style="width: auto;">
+                    <label for="rememberMe" style="margin: 0; font-weight: 500;">Remember me on this device (email only)</label>
+                </div>
                 <button type="submit">Sign In to KHOJ</button>
             </form>
 
             <div class="auth-footer">
-                <p>New to KHOJ? <a href="${pageContext.request.contextPath}/views/auth/register.jsp">Create an account</a></p>
+                <p>New to KHOJ? <a href="${pageContext.request.contextPath}/register">Create an account</a></p>
             </div>
 
             <div class="mobile-back">

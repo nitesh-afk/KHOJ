@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet({"/admin/verify-property", "/admin/approve-landlord", "/admin/reject-landlord", "/admin/update-user-status", "/admin/deactivate-user", "/admin/reactivate-user", "/admin/delete-user", "/admin/update-message-status"})
+@WebServlet({"/admin/verify-property", "/admin/approve-landlord", "/admin/reject-landlord", "/admin/approve-tenant", "/admin/update-user-status", "/admin/deactivate-user", "/admin/reactivate-user", "/admin/delete-user", "/admin/delete-property", "/admin/update-message-status"})
 public class AdminActionServlet extends HttpServlet {
     private final AdminDAO adminDAO = new AdminDAO();
 
@@ -35,30 +35,47 @@ public class AdminActionServlet extends HttpServlet {
                     int propId = Integer.parseInt(request.getParameter("propertyId"));
                     boolean verify = Boolean.parseBoolean(request.getParameter("verify"));
                     success = adminDAO.verifyProperty(propId, verify);
-                    response.sendRedirect(request.getContextPath() + "/admin/property-verification?success=" + success);
+                    String returnPath = request.getParameter("returnPath");
+                    if ("rooms".equals(returnPath)) {
+                        response.sendRedirect(request.getContextPath() + "/admin/rooms?verified=" + success);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/admin/dashboard?verified=" + success);
+                    }
+                    break;
+
+                case "/admin/delete-property":
+                    int deletePropId = Integer.parseInt(request.getParameter("propertyId"));
+                    success = adminDAO.deleteProperty(deletePropId);
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard?deleted=" + success);
                     break;
 
                 case "/admin/approve-landlord":
                     int landlordIdApprove = Integer.parseInt(request.getParameter("userId"));
                     success = adminDAO.approveLandlord(landlordIdApprove);
-                    response.sendRedirect(request.getContextPath() + "/admin/user-approval?success=" + success);
+                    response.sendRedirect(request.getContextPath() + "/admin/users?success=" + success);
                     break;
 
                 case "/admin/reject-landlord":
                     int landlordIdReject = Integer.parseInt(request.getParameter("userId"));
                     success = adminDAO.rejectLandlord(landlordIdReject);
-                    response.sendRedirect(request.getContextPath() + "/admin/user-approval?success=" + success);
+                    response.sendRedirect(request.getContextPath() + "/admin/users?success=" + success);
+                    break;
+
+                case "/admin/approve-tenant":
+                    int tenantIdApprove = Integer.parseInt(request.getParameter("userId"));
+                    success = adminDAO.approveTenant(tenantIdApprove);
+                    response.sendRedirect(request.getContextPath() + "/admin/users?success=" + success);
                     break;
 
                 case "/admin/update-user-status":
                     int userId = Integer.parseInt(request.getParameter("userId"));
                     String status = request.getParameter("status");
                     success = adminDAO.setUserStatus(userId, status);
-                    response.sendRedirect(request.getContextPath() + "/admin/user-approval?success=" + success);
+                    response.sendRedirect(request.getContextPath() + "/admin/users?success=" + success);
                     break;
                 case "/admin/deactivate-user":
                     int deId = Integer.parseInt(request.getParameter("userId"));
-                    success = adminDAO.setUserStatus(deId, "DEACTIVATED");
+                    success = adminDAO.setUserStatus(deId, "INACTIVE");
                     response.sendRedirect(request.getContextPath() + "/admin/dashboard?success=" + success);
                     break;
                 case "/admin/reactivate-user":

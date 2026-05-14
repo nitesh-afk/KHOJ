@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,13 +64,28 @@
             </div>
             <div class="stat-card card-rooms">
                 <div class="stat-icon"><i class="fa-solid fa-building"></i></div>
-                <div class="stat-number">${stats.totalRooms}</div>
+                <div class="stat-number">${stats.totalProperties}</div>
                 <div class="stat-label">Total Properties</div>
             </div>
             <div class="stat-card card-pending">
                 <div class="stat-icon"><i class="fa-regular fa-clock"></i></div>
                 <div class="stat-number">${stats.pendingApps}</div>
                 <div class="stat-label">Pending Applications</div>
+            </div>
+            <div class="stat-card card-rooms">
+                <div class="stat-icon"><i class="fa-solid fa-file-contract"></i></div>
+                <div class="stat-number">${stats.totalApplications}</div>
+                <div class="stat-label">Total Applications</div>
+            </div>
+            <div class="stat-card card-users">
+                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-number">${stats.verifiedProperties}</div>
+                <div class="stat-label">Verified Listings</div>
+            </div>
+            <div class="stat-card card-pending">
+                <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
+                <div class="stat-number">${stats.pendingLandlords}</div>
+                <div class="stat-label">Landlords Pending Approval</div>
             </div>
         </div>
 
@@ -103,18 +119,17 @@
                             <td>${room.createdAt}</td>
                             <td>
                                 <div style="display: flex; gap: 8px;">
-                                    <form action="${pageContext.request.contextPath}/admin/dashboard" method="post">
-                                        <input type="hidden" name="action" value="approveProperty">
+                                    <form action="${pageContext.request.contextPath}/admin/verify-property" method="post" style="display: inline;">
                                         <input type="hidden" name="propertyId" value="${room.propertyId}">
+                                        <input type="hidden" name="verify" value="true">
+                                        <input type="hidden" name="returnPath" value="dashboard">
                                         <button type="submit" class="btn btn-approve" style="background: #10b981; color: white;">
                                             <i class="fa-solid fa-check"></i> Approve
                                         </button>
                                     </form>
-                                    
-                                    <form action="${pageContext.request.contextPath}/admin/dashboard" method="post">
-                                        <input type="hidden" name="action" value="rejectProperty">
+                                    <form action="${pageContext.request.contextPath}/admin/delete-property" method="post" style="display: inline;">
                                         <input type="hidden" name="propertyId" value="${room.propertyId}">
-                                        <button type="submit" class="btn btn-delete" style="background: #ef4444; color: white;" onclick="return confirm('Reject and Delete this property listing?')">
+                                        <button type="submit" class="btn btn-delete" style="background: #ef4444; color: white;" onclick="return confirm('Reject and delete this property listing?')">
                                             <i class="fa-solid fa-xmark"></i> Reject
                                         </button>
                                     </form>

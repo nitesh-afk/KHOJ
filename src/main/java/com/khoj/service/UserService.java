@@ -35,13 +35,15 @@ public class UserService { // Abhiyan
         // Hash the password before saving (Business Logic)
         String hashedPassword = SecurityUtil.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        
-        // Ensure status is ACTIVE by default
-        if (user.getStatus() == null || user.getStatus().isEmpty()) {
-            user.setStatus("ACTIVE");
-        }
-        
+
         return userDAO.registerUser(user);
+    }
+
+    /**
+     * @return true if the phone number is already registered (non-blank values only).
+     */
+    public boolean isPhoneTaken(String phone) {
+        return userDAO.isPhoneTaken(phone);
     }
 
     /**

@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -234,6 +235,7 @@
         }
         .badge-success { background: #D8F3DC; color: #2D6A4F; }
         .badge-info { background: #E8F4FD; color: #1E40AF; }
+        .badge-danger { background: #FFE4E4; color: #7B1D1D; }
         .badge-role { background: #F0EDE8; color: #6B6560; }
 
         /* Buttons */
@@ -297,17 +299,21 @@
                 <div class="logo-subtitle">Admin Control</div>
             </div>
             <hr class="sidebar-divider">
-            <div class="superuser-badge">
-                <div class="superuser-avatar">A</div>
-                <div class="superuser-info">
-                    <span class="superuser-name">System Admin</span>
-                    <span class="superuser-role">SUPERUSER</span>
+            <a href="${pageContext.request.contextPath}/profile" class="profile-link" style="text-decoration: none; color: inherit; display: block;">
+                <div class="superuser-badge">
+                    <div class="superuser-avatar">${empty sessionScope.user.fullName ? '?' : fn:substring(sessionScope.user.fullName, 0, 1)}</div>
+                    <div class="superuser-info">
+                        <span class="superuser-name">${sessionScope.user.fullName}</span>
+                        <span class="superuser-role">SUPERUSER</span>
+                    </div>
                 </div>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="${pageContext.request.contextPath}/admin/dashboard"><i class="fa-solid fa-gauge-high"></i> Command Center</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/property-verification"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
-                <li><a href="${pageContext.request.contextPath}/admin/user-approval" class="active"><i class="fa-solid fa-users"></i> User Governance</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/rooms"><i class="fa-solid fa-building"></i> Property Moderation</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/users" class="active"><i class="fa-solid fa-users"></i> User Governance</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/messages"><i class="fa-solid fa-envelope"></i> Message Center</a></li>
+                <li><a href="${pageContext.request.contextPath}/admin/analytics"><i class="fa-solid fa-chart-bar"></i> Analytics</a></li>
                 <li><a href="${pageContext.request.contextPath}/home"><i class="fa-solid fa-earth-asia"></i> Public Site</a></li>
             </ul>
         </div>
@@ -327,6 +333,48 @@
         <c:if test="${not empty param.msg}">
             <div class="alert-banner">
                 <i class="fa-solid fa-circle-check"></i> Action processed: ${param.msg}
+            </div>
+        </c:if>
+        <c:if test="${not empty param.success}">
+            <div class="alert-banner">
+                <i class="fa-solid fa-circle-check"></i> Action completed (success=${param.success})
+            </div>
+        </c:if>
+
+        <c:if test="${not empty pendingTenants}">
+            <div class="section-wrapper" style="margin-bottom: 28px;">
+                <div class="header" style="margin-bottom: 20px;">
+                    <div class="header-eyebrow">Onboarding</div>
+                    <h1 style="font-size: 1.35rem;">Pending tenant registrations</h1>
+                    <p class="subtitle">These users completed signup and are waiting for activation before they can sign in.</p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name &amp; contact</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="t" items="${pendingTenants}">
+                            <tr>
+                                <td class="cell-id">#${t.id}</td>
+                                <td>
+                                    <div class="cell-bold">${t.fullName}</div>
+                                    <div class="cell-muted">${t.email}</div>
+                                    <div class="cell-muted">${t.phoneNumber}</div>
+                                </td>
+                                <td>
+                                    <form action="${pageContext.request.contextPath}/admin/approve-tenant" method="post" style="display: inline;">
+                                        <input type="hidden" name="userId" value="${t.id}">
+                                        <button type="submit" class="btn btn-verify">Activate tenant</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
             </div>
         </c:if>
 
@@ -359,22 +407,33 @@
                                     </td>
                                     <td><span class="badge badge-role">${user.role}</span></td>
                                     <td>
-                                        <span class="badge ${user.status == 'VERIFIED' ? 'badge-success' : user.status == 'ACTIVE' ? 'badge-info' : 'badge-role'}">
+                                        <span class="badge ${user.status == 'ACTIVE' ? 'badge-success' : user.status == 'INACTIVE' ? 'badge-danger' : 'badge-role'}">
                                             ${user.status}
                                         </span>
+                                        <c:if test="${user.role == 'LANDLORD' && not empty user.approvalStatus}">
+                                            <div class="cell-muted" style="margin-top: 6px;">Landlord gate: ${user.approvalStatus}</div>
+                                        </c:if>
                                     </td>
                                     <td>
-                                        <c:if test="${user.role == 'LANDLORD' && user.status != 'VERIFIED'}">
-                                            <form action="${pageContext.request.contextPath}/admin/update-user-status" method="post" style="display: inline;">
+                                        <c:if test="${user.role == 'LANDLORD' && user.approvalStatus == 'PENDING'}">
+                                            <form action="${pageContext.request.contextPath}/admin/approve-landlord" method="post" style="display: inline;">
                                                 <input type="hidden" name="userId" value="${user.id}">
-                                                <input type="hidden" name="status" value="VERIFIED">
-                                                <button type="submit" class="btn btn-verify">Verify</button>
+                                                <button type="submit" class="btn btn-verify">Approve landlord</button>
+                                            </form>
+                                            <form action="${pageContext.request.contextPath}/admin/reject-landlord" method="post" style="display: inline;">
+                                                <input type="hidden" name="userId" value="${user.id}">
+                                                <button type="submit" class="btn btn-delete-lg" onclick="return confirm('Reject this landlord registration?')">Reject</button>
                                             </form>
                                         </c:if>
-                                        <form action="${pageContext.request.contextPath}/admin/delete-user" method="post" style="display: inline;">
-                                            <input type="hidden" name="userId" value="${user.id}">
-                                            <button type="submit" class="btn btn-delete-lg" onclick="return confirm('Delete this user permanently?')">Delete</button>
-                                        </form>
+                                        <c:if test="${user.role != 'ADMIN'}">
+                                            <form action="${pageContext.request.contextPath}/admin/delete-user" method="post" style="display: inline;">
+                                                <input type="hidden" name="userId" value="${user.id}">
+                                                <button type="submit" class="btn btn-delete-lg" onclick="return confirm('Delete this user permanently?')">Delete</button>
+                                            </form>
+                                        </c:if>
+                                        <c:if test="${user.role == 'ADMIN'}">
+                                            <span class="cell-muted" style="font-size: 0.75rem;">System admin (listed once)</span>
+                                        </c:if>
                                     </td>
                                 </tr>
                             </c:forEach>

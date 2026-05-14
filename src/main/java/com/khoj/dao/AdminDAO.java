@@ -26,11 +26,19 @@ public class AdminDAO {
         String usersQuery = "SELECT COUNT(*) FROM users";
         String propertiesQuery = "SELECT COUNT(*) FROM properties";
         String pendingAppsQuery = "SELECT COUNT(*) FROM applications WHERE status = 'PENDING'";
+        String appsQuery = "SELECT COUNT(*) FROM applications";
+        String verifiedPropsQuery = "SELECT COUNT(*) FROM properties WHERE is_verified = TRUE";
+        String pendingLandlordsQuery =
+                "SELECT COUNT(*) FROM users u JOIN roles r ON u.role_id = r.role_id "
+                + "WHERE r.role_name = 'LANDLORD' AND u.approved_status = 'PENDING'";
 
         try (Connection conn = DBConnection.getConnection()) {
             stats.put("totalUsers", fetchCount(conn, usersQuery));
             stats.put("totalProperties", fetchCount(conn, propertiesQuery));
             stats.put("pendingApps", fetchCount(conn, pendingAppsQuery));
+            stats.put("totalApplications", fetchCount(conn, appsQuery));
+            stats.put("verifiedProperties", fetchCount(conn, verifiedPropsQuery));
+            stats.put("pendingLandlords", fetchCount(conn, pendingLandlordsQuery));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -289,6 +297,42 @@ public class AdminDAO {
         }
     }
 
+    /**
+     * All tenants and landlords, plus at most one ADMIN row (lowest user_id) so duplicate
+     * bootstrap admin accounts do not clutter the governance UI.
+     */
+    public List<User> getUsersForGovernance() {
+        List<User> users = new ArrayList<>();
+        String query = "SELECT u.user_id, u.full_name, u.email, u.status, u.approved_status, r.role_name "
+                + "FROM users u "
+                + "JOIN roles r ON u.role_id = r.role_id "
+                + "WHERE ( (r.role_name = 'TENANT' AND u.status <> 'PENDING') OR r.role_name = 'LANDLORD' ) "
+                + "   OR (r.role_name = 'ADMIN' AND u.user_id = ("
+                + "         SELECT MIN(u2.user_id) FROM users u2 "
+                + "         JOIN roles r2 ON u2.role_id = r2.role_id "
+                + "         WHERE r2.role_name = 'ADMIN')) "
+                + "ORDER BY CASE r.role_name WHEN 'ADMIN' THEN 0 WHEN 'LANDLORD' THEN 1 ELSE 2 END, "
+                + "u.user_id DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("user_id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setStatus(rs.getString("status"));
+                user.setRole(rs.getString("role_name"));
+                String appr = rs.getString("approved_status");
+                user.setApprovalStatus(rs.wasNull() ? null : appr);
+                users.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
     public List<User> getUsersByRole(String roleName) {
         List<User> users = new ArrayList<>();
         String query = "SELECT u.user_id, u.full_name, u.email, u.status, r.role_name " +
@@ -394,5 +438,46 @@ public class AdminDAO {
             pst.setInt(1, userId);
             return pst.executeUpdate() > 0;
         } catch (Exception e) { e.printStackTrace(); return false; }
+    }
+
+    /**
+     * Tenant accounts created via self-service registration (status PENDING until an admin activates them).
+     */
+    public List<User> getPendingTenants() {
+        List<User> pendingTenants = new ArrayList<>();
+        String query = "SELECT u.user_id, u.full_name, u.email, u.phone_number, u.status, u.approved_status, r.role_name "
+                + "FROM users u JOIN roles r ON u.role_id = r.role_id "
+                + "WHERE r.role_name = 'TENANT' AND u.status = 'PENDING' "
+                + "ORDER BY u.user_id ASC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("user_id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
+                user.setStatus(rs.getString("status"));
+                user.setRole(rs.getString("role_name"));
+                user.setApprovalStatus(rs.getString("approved_status"));
+                pendingTenants.add(user);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return pendingTenants;
+    }
+
+    public boolean approveTenant(int userId) {
+        String query = "UPDATE users SET status = 'ACTIVE' WHERE user_id = ? AND status = 'PENDING'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setInt(1, userId);
+            return pst.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

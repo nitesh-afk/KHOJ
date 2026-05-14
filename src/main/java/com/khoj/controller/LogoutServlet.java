@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 
 @WebServlet({"/LogoutServlet", "/logout"})
@@ -19,6 +20,12 @@ public class LogoutServlet extends HttpServlet {
         if (session != null) {
             session.invalidate(); // Clear session data
         }
+
+        Cookie kill = new Cookie("userEmail", "");
+        kill.setMaxAge(0);
+        String ctx = request.getContextPath();
+        kill.setPath(ctx == null || ctx.isEmpty() ? "/" : ctx);
+        response.addCookie(kill);
 
         // SECURITY: Clear cache so 'Back' button doesn't show private dashboard data
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1

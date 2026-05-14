@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -256,15 +257,45 @@
             <a href="${pageContext.request.contextPath}/home" class="auth-logo">KHOJ</a>
             
             <h2>Join KHOJ</h2>
-            <p class="auth-subtitle">Create an account to unlock premium properties and verified landlords across Nepal.</p>
+            <p class="auth-subtitle">Create an account to unlock premium properties and verified landlords across Nepal. If you register as a tenant, an administrator must activate your account before you can sign in.</p>
             
-            <% if (request.getParameter("error") != null) { %>
+            <c:if test="${param.error == 'invalid_name'}">
                 <div class="alert alert-error">
-                    <i class="fa-solid fa-circle-exclamation"></i> Registration Failed: <%= request.getParameter("error") %>
+                    <i class="fa-solid fa-circle-exclamation"></i> Full name may only contain letters and spaces.
                 </div>
-            <% } %>
+            </c:if>
+            <c:if test="${param.error == 'invalid_email'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Please enter a valid email address.
+                </div>
+            </c:if>
+            <c:if test="${param.error == 'weak_password'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Password must be at least 6 characters.
+                </div>
+            </c:if>
+            <c:if test="${param.error == 'invalid_phone'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Phone number is required for registration.
+                </div>
+            </c:if>
+            <c:if test="${param.error == 'phone_taken'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> This phone number is already registered.
+                </div>
+            </c:if>
+            <c:if test="${param.error == 'email_taken'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> This email is already in use.
+                </div>
+            </c:if>
+            <c:if test="${param.error == 'failed' || param.error == 'exception'}">
+                <div class="alert alert-error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Registration could not be completed. Please try again.
+                </div>
+            </c:if>
 
-            <form action="${pageContext.request.contextPath}/RegisterServlet" method="post">
+            <form action="${pageContext.request.contextPath}/register" method="post">
                 <div class="form-group">
                     <label for="fullName">Full Name</label>
                     <input type="text" id="fullName" name="fullName" placeholder="e.g. John Doe" required>
@@ -272,6 +303,10 @@
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone number</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="+977 9800000000" required autocomplete="tel">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
@@ -288,7 +323,7 @@
             </form>
 
             <div class="auth-footer">
-                <p>Already have an account? <a href="${pageContext.request.contextPath}/views/auth/login.jsp">Log in here</a></p>
+                <p>Already have an account? <a href="${pageContext.request.contextPath}/login">Log in here</a></p>
             </div>
 
             <div class="mobile-back">

@@ -285,7 +285,7 @@
 
 <nav class="navbar">
     <a href="${pageContext.request.contextPath}/home" class="brand">KHOJ</a>
-    <a href="${pageContext.request.contextPath}/logout" style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+    <a href="${pageContext.request.contextPath}/LogoutServlet" style="color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem;">
         <i class="fa-solid fa-power-off"></i> Logout
     </a>
 </nav>
@@ -332,6 +332,16 @@
         <c:if test="${param.success == 'true'}">
             <div class="alert alert-success">
                 <i class="fa-solid fa-circle-check"></i> Identity vault updated successfully.
+            </div>
+        </c:if>
+        
+        <c:if test="${not empty errorMessage || param.error == 'user_not_found'}">
+            <div class="alert alert-error">
+                <i class="fa-solid fa-triangle-exclamation"></i> 
+                <c:choose>
+                    <c:when test="${param.error == 'user_not_found'}">Profile session lost. Displaying cached data.</c:when>
+                    <c:otherwise>${errorMessage}</c:otherwise>
+                </c:choose>
             </div>
         </c:if>
 

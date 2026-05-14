@@ -175,6 +175,7 @@
     <div>
         <div class="logo">KHOJ</div>
         <div class="logo-subtitle">Admin Control</div>
+        <p style="color:rgba(255,255,255,0.55);font-size:0.78rem;padding:4px 16px 14px;margin:0;">${sessionScope.user.fullName}</p>
         <ul class="nav-links">
             <li><a href="${pageContext.request.contextPath}/admin/dashboard">Command Center</a></li>
             <li><a href="${pageContext.request.contextPath}/admin/rooms">Property Moderation</a></li>

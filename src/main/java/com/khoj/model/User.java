@@ -8,6 +8,8 @@ public class User {
     private String password;
     private String role; // ADMIN, LANDLORD, TENANT
     private String status; // ACTIVE, INACTIVE, PENDING
+    /** Landlord onboarding: PENDING / APPROVED / REJECTED (from users.approved_status); null for other roles. */
+    private String approvalStatus;
     private String profileImg;
     private String createdAt;
 
@@ -54,6 +56,9 @@ public class User {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getApprovalStatus() { return approvalStatus; }
+    public void setApprovalStatus(String approvalStatus) { this.approvalStatus = approvalStatus; }
 
     public String getProfileImg() { return profileImg; }
     public void setProfileImg(String profileImg) { this.profileImg = profileImg; }

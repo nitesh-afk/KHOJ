@@ -35,7 +35,16 @@ public class ProfileServlet extends HttpServlet {
         User profileUser = userService.getUserById(sessionUser.getId());
         
         if (profileUser == null) {
-            response.sendRedirect(request.getContextPath() + "/profile?error=user_not_found");
+            // Check if we already have an error parameter to avoid redirect loops
+            if (request.getParameter("error") == null) {
+                response.sendRedirect(request.getContextPath() + "/profile?error=user_not_found");
+            } else {
+                // If we're already here with an error, don't redirect again.
+                // Show the profile page with session data as fallback.
+                request.setAttribute("profileUser", sessionUser);
+                request.setAttribute("errorMessage", "Could not refresh profile data from database.");
+                request.getRequestDispatcher("/views/profile.jsp").forward(request, response);
+            }
             return;
         }
         

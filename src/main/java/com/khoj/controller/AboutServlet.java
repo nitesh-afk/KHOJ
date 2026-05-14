@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Public marketing page: forwards to the protected JSP under WEB-INF so it cannot be requested directly.
+ */
 @WebServlet("/about")
 public class AboutServlet extends HttpServlet {
     @Override

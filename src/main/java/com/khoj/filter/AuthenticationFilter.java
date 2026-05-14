@@ -34,6 +34,13 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
+        // Accounts pending admin approval must not access protected journeys
+        if ("PENDING".equalsIgnoreCase(user.getStatus())) {
+            session.invalidate();
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/views/auth/login.jsp?error=pending_approval");
+            return;
+        }
+
         // 2. Authorization Check: Does the user have the right role for this path?
         String role = user.getRole();
 
