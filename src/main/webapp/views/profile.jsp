@@ -335,12 +335,20 @@
             </div>
         </c:if>
         
-        <c:if test="${not empty errorMessage || param.error == 'user_not_found'}">
+        <c:if test="${not empty param.error}">
             <div class="alert alert-error">
                 <i class="fa-solid fa-triangle-exclamation"></i> 
                 <c:choose>
-                    <c:when test="${param.error == 'user_not_found'}">Profile session lost. Displaying cached data.</c:when>
-                    <c:otherwise>${errorMessage}</c:otherwise>
+                    <c:when test="${param.error == 'invalid_name'}">Name can only contain letters, spaces, periods, hyphens, and apostrophes.</c:when>
+                    <c:when test="${param.error == 'invalid_email'}">Please enter a valid email address.</c:when>
+                    <c:when test="${param.error == 'duplicate_email'}">That email is already used by another account.</c:when>
+                    <c:when test="${param.error == 'password_mismatch'}">New password and confirmation do not match.</c:when>
+                    <c:when test="${param.error == 'password_too_short'}">New password must be at least 8 characters.</c:when>
+                    <c:when test="${param.error == 'invalid_current_password'}">Current password is incorrect.</c:when>
+                    <c:when test="${param.error == 'update_failed'}">Could not save changes. Please try again.</c:when>
+                    <c:when test="${param.error == 'user_not_found'}">Your account could not be loaded. Please log out and sign in again.</c:when>
+                    <c:when test="${param.error == 'invalid_action'}">Unknown action. Please try again.</c:when>
+                    <c:otherwise>Something went wrong. Please try again.</c:otherwise>
                 </c:choose>
             </div>
         </c:if>

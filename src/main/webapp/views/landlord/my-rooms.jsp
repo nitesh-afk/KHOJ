@@ -328,8 +328,9 @@
             <li><a href="${pageContext.request.contextPath}/landlord/dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
             <li><a href="${pageContext.request.contextPath}/my-rooms" class="active"><i class="fa-solid fa-door-open"></i> My Rooms</a></li>
             <li><a href="${pageContext.request.contextPath}/add-room"><i class="fa-solid fa-circle-plus"></i> Add Listing</a></li>
-            <li><a href="${pageContext.request.contextPath}/landlord/inbound-applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
-        </ul>
+        <li><a href="${pageContext.request.contextPath}/landlord/inbound-applications"><i class="fa-solid fa-inbox"></i> Applications</a></li>
+        <li><a href="${pageContext.request.contextPath}/profile"><i class="fa-solid fa-user"></i> My Profile</a></li>
+    </ul>
         <div class="sidebar-bottom">
             <a href="${pageContext.request.contextPath}/profile" class="user-profile-link" style="text-decoration: none; color: inherit; display: block; transition: all 0.3s ease;">
                 <div class="user-profile">

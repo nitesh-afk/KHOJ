@@ -55,6 +55,10 @@ public class UserService { // Abhiyan
         return userDAO.getUserByEmail(email) != null;
     }
 
+    public boolean isEmailTaken(String email, int excludeUserId) {
+        return userDAO.isEmailTaken(email, excludeUserId);
+    }
+
     public List<User> getAllUsers() {
         return userDAO.getAllUsers();
     }
@@ -77,5 +81,26 @@ public class UserService { // Abhiyan
 
     public User getUserById(int userId) {
         return userDAO.getUserById(userId);
+    }
+
+    public User getUserByEmail(String email) {
+        return userDAO.getUserByEmail(email);
+    }
+
+    /**
+     * Loads the canonical user row for profile operations, using session id or email fallback.
+     */
+    public User getUserForProfile(User sessionUser) {
+        if (sessionUser == null) {
+            return null;
+        }
+        User fromDb = null;
+        if (sessionUser.getId() > 0) {
+            fromDb = userDAO.getUserById(sessionUser.getId());
+        }
+        if (fromDb == null && sessionUser.getEmail() != null && !sessionUser.getEmail().isBlank()) {
+            fromDb = userDAO.getUserByEmail(sessionUser.getEmail().trim());
+        }
+        return fromDb;
     }
 }

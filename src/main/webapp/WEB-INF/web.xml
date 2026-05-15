@@ -6,6 +6,10 @@
 
 
     <error-page>
+        <error-code>403</error-code>
+        <location>/views/auth/403-access-denied.jsp</location>
+    </error-page>
+    <error-page>
         <error-code>404</error-code>
         <location>/views/error.jsp</location>
     </error-page>

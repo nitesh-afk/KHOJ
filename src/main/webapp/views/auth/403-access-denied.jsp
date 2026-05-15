@@ -12,7 +12,7 @@
         <h1 style="font-size: 5rem; color: #ef4444; margin-bottom: 1rem;">403</h1>
         <h2 style="margin-bottom: 1rem;">Access Denied</h2>
         <p style="color: #64748b; margin-bottom: 2rem;">You do not have permission to view this command center.</p>
-        <a href="${pageContext.request.contextPath}/index.jsp" style="text-decoration: none; background: #2563eb; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600;">Go Back Home</a>
+        <a href="${pageContext.request.contextPath}/home" style="text-decoration: none; background: #2563eb; color: white; padding: 0.75rem 2rem; border-radius: 0.5rem; font-weight: 600;">Go Back Home</a>
     </div>
 </body>
 </html>

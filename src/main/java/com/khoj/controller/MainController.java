@@ -84,10 +84,19 @@ public class MainController extends HttpServlet {
                     request.setAttribute("unreadMessages", tenantMsgDAO.getTotalUnreadCount(tenant.getId()));
                 } catch (Exception e) { e.printStackTrace(); }
                 
-                // CRITICAL FIX: Fetch property types for the search filter
                 com.khoj.service.PropertyService ps = new com.khoj.service.PropertyService();
                 request.setAttribute("propertyTypes", ps.getAllPropertyTypes());
-                
+
+                int limit = 12;
+                int offset = 0;
+                java.util.List<com.khoj.model.Property> properties = ps.searchProperties(null, null, null, null, null, null, null, limit, offset);
+                int totalResults = ps.getSearchTotalCount(null, null, null, null, null, null, null);
+                int totalPages = (int) Math.ceil((double) totalResults / limit);
+                request.setAttribute("properties", properties);
+                request.setAttribute("currentPage", 1);
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("totalResults", totalResults);
+
                 request.getRequestDispatcher("/views/tenant/dashboard.jsp").forward(request, response);
                 break;
             case "/ViewApplications":

@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @WebServlet("/profile")
 public class ProfileServlet extends HttpServlet {
-    private static final String NAME_REGEX = "^[a-zA-Z '-]+$";
+    private static final String NAME_REGEX = "^[A-Za-z .'-]+$";
     private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
 
     private final UserService userService = new UserService();
@@ -32,22 +32,13 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        User profileUser = userService.getUserById(sessionUser.getId());
-        
+        User profileUser = userService.getUserForProfile(sessionUser);
         if (profileUser == null) {
-            // Check if we already have an error parameter to avoid redirect loops
-            if (request.getParameter("error") == null) {
-                response.sendRedirect(request.getContextPath() + "/profile?error=user_not_found");
-            } else {
-                // If we're already here with an error, don't redirect again.
-                // Show the profile page with session data as fallback.
-                request.setAttribute("profileUser", sessionUser);
-                request.setAttribute("errorMessage", "Could not refresh profile data from database.");
-                request.getRequestDispatcher("/views/profile.jsp").forward(request, response);
-            }
+            response.sendRedirect(request.getContextPath() + "/views/auth/login.jsp?error=unauthorized");
             return;
         }
-        
+        session.setAttribute("user", profileUser);
+
         // Activity Summary Logic
         int activityCount = 0;
         if ("LANDLORD".equalsIgnoreCase(profileUser.getRole())) {
@@ -79,15 +70,14 @@ public class ProfileServlet extends HttpServlet {
         }
 
         String action = request.getParameter("action");
-        int userId = sessionUser.getId();
 
         if ("updateProfile".equalsIgnoreCase(action)) {
-            handleProfileUpdate(request, response, session, userId);
+            handleProfileUpdate(request, response, session, sessionUser);
             return;
         }
 
         if ("updatePassword".equalsIgnoreCase(action)) {
-            handlePasswordUpdate(request, response, session, userId);
+            handlePasswordUpdate(request, response, session, sessionUser);
             return;
         }
 
@@ -95,7 +85,7 @@ public class ProfileServlet extends HttpServlet {
     }
 
     private void handleProfileUpdate(HttpServletRequest request, HttpServletResponse response, HttpSession session,
-            int userId) throws IOException {
+            User sessionUser) throws IOException {
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
@@ -110,20 +100,20 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        User existingUser = userService.getUserById(userId);
+        User existingUser = userService.getUserForProfile(sessionUser);
         if (existingUser == null) {
             response.sendRedirect(request.getContextPath() + "/profile?error=user_not_found");
             return;
         }
 
-        boolean emailChanged = !email.equalsIgnoreCase(existingUser.getEmail());
-        if (emailChanged && userService.isEmailTaken(email)) {
+        String trimmedEmail = email.trim();
+        if (userService.isEmailTaken(trimmedEmail, existingUser.getId())) {
             response.sendRedirect(request.getContextPath() + "/profile?error=duplicate_email");
             return;
         }
 
         existingUser.setFullName(fullName.trim());
-        existingUser.setEmail(email.trim());
+        existingUser.setEmail(trimmedEmail);
         existingUser.setPhoneNumber(phone);
         // Profile image is kept as is for now, but ready for extension
         
@@ -133,12 +123,13 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        session.setAttribute("user", existingUser);
+        User refreshedUser = userService.getUserForProfile(existingUser);
+        session.setAttribute("user", refreshedUser != null ? refreshedUser : existingUser);
         response.sendRedirect(request.getContextPath() + "/profile?success=true");
     }
 
     private void handlePasswordUpdate(HttpServletRequest request, HttpServletResponse response, HttpSession session,
-            int userId) throws IOException {
+            User sessionUser) throws IOException {
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
@@ -153,7 +144,7 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        User existingUser = userService.getUserById(userId);
+        User existingUser = userService.getUserForProfile(sessionUser);
         if (existingUser == null) {
             response.sendRedirect(request.getContextPath() + "/profile?error=user_not_found");
             return;
@@ -165,13 +156,13 @@ public class ProfileServlet extends HttpServlet {
         }
 
         String newHashedPassword = SecurityUtil.hashPassword(newPassword);
-        boolean updated = userService.updatePassword(userId, newHashedPassword);
+        boolean updated = userService.updatePassword(existingUser.getId(), newHashedPassword);
         if (!updated) {
             response.sendRedirect(request.getContextPath() + "/profile?error=update_failed");
             return;
         }
 
-        User refreshedUser = userService.getUserById(userId);
+        User refreshedUser = userService.getUserForProfile(sessionUser);
         if (refreshedUser != null) {
             session.setAttribute("user", refreshedUser);
         }

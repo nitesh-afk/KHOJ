@@ -10,6 +10,21 @@ import java.util.List;
 
 public class UserDAO {
 
+    public boolean isEmailTaken(String email, int excludeUserId) {
+        String query = "SELECT 1 FROM users WHERE email = ? AND user_id <> ? LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(query)) {
+            pst.setString(1, email);
+            pst.setInt(2, excludeUserId);
+            try (ResultSet rs = pst.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public User getUserByEmail(String email) {
         String query = "SELECT u.*, r.role_name FROM users u " +
                        "LEFT JOIN roles r ON u.role_id = r.role_id " +
@@ -149,7 +164,7 @@ public class UserDAO {
 
     public boolean updateUserProfile(User user) {
         String duplicateCheckQuery = "SELECT 1 FROM users WHERE email = ? AND user_id <> ? LIMIT 1";
-        String updateQuery = "UPDATE users SET full_name = ?, email = ?, phone_number = ?, profile_img = ? WHERE user_id = ?";
+        String updateQuery = "UPDATE users SET full_name = ?, email = ?, phone_number = ? WHERE user_id = ?";
 
         try (Connection conn = DBConnection.getConnection()) {
             try (PreparedStatement duplicatePst = conn.prepareStatement(duplicateCheckQuery)) {
@@ -166,8 +181,7 @@ public class UserDAO {
                 updatePst.setString(1, user.getFullName());
                 updatePst.setString(2, user.getEmail());
                 updatePst.setString(3, user.getPhoneNumber());
-                updatePst.setString(4, user.getProfileImg());
-                updatePst.setInt(5, user.getId());
+                updatePst.setInt(4, user.getId());
                 return updatePst.executeUpdate() > 0;
             }
         } catch (Exception e) {
@@ -190,7 +204,12 @@ public class UserDAO {
     }
 
     public User getUserById(int userId) {
-        String query = "SELECT u.*, r.role_name FROM users u "
+        if (userId <= 0) {
+            return null;
+        }
+        String query = "SELECT u.user_id, u.full_name, u.email, u.password, u.phone_number, "
+                + "u.status, u.approved_status, u.created_at, r.role_name "
+                + "FROM users u "
                 + "LEFT JOIN roles r ON u.role_id = r.role_id "
                 + "WHERE u.user_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -198,15 +217,15 @@ public class UserDAO {
             pst.setInt(1, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    User user = new User();
-                    user.setId(rs.getInt("user_id"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setEmail(rs.getString("email"));
+                    User user = new User(
+                            rs.getInt("user_id"),
+                            rs.getString("full_name"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("role_name"),
+                            rs.getString("status")
+                    );
                     user.setPhoneNumber(rs.getString("phone_number"));
-                    user.setPassword(rs.getString("password"));
-                    user.setRole(rs.getString("role_name"));
-                    user.setStatus(rs.getString("status"));
-                    user.setProfileImg(rs.getString("profile_img"));
                     user.setApprovalStatus(rs.getString("approved_status"));
                     user.setCreatedAt(rs.getString("created_at"));
                     return user;
